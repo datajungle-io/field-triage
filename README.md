@@ -10,7 +10,7 @@ email and org, so there is no form anywhere in the product.
 
 ## Parity with the production pipeline
 
-This is a port of the Canopy field-census pipeline, collapsed from
+This is a port of the Data Jungle field-census pipeline, collapsed from
 (Airbyte → BigQuery → dbt → Evidence) into (Salesforce → Postgres → Next.js). All four
 reference sources are implemented, because [no single Salesforce API covers
 them all](../../instances/canopy-data-jungle/salesforce/jobs/ingest_field_references.py):
@@ -247,7 +247,7 @@ verify the consent screen, PKCE, and that revocation actually fires.
   path: all 9 phases complete, 602 fields across 10 objects, 11 delete-ready, 6 with zero
   dependencies. The ReportType SOAP retrieve — the most fragile piece — completed 12/12.
 - **Dependency counts match production.** Account 8, Contact 8, Lead 9, Opportunity 18,
-  zero elsewhere — identical to the Canopy Field Triage page for the same org. Strong
+  zero elsewhere — identical to the Data Jungle Field Triage page for the same org. Strong
   evidence the four-source reference pipeline is faithfully ported.
 - **Degradation.** `Quote` isn't enabled in that org: `FieldDefinition` returned 0 rows and
   `describe` 404'd. Both phases recorded the failure and carried on. 24 of 31 reports were

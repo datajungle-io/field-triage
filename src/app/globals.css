@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ---------------------------------------------------------------------------
- * Canopy surface tokens.
+ * Data Jungle surface tokens.
  *
  * Evidence computes these from evidence.config.yaml and emits them as --twc-*
  * HSL triplets. They are reproduced here as literals (read out of the built

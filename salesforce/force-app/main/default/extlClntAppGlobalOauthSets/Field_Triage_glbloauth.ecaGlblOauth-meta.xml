@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OAuth configuration for the Field Triage External Client App.
+
+  Naming is load-bearing: these records must be <AppName>_glbloauth,
+  <AppName>_oauth and <AppName>_oauthPlcy. Salesforce resolves them by
+  convention, not by the externalClientApplication field alone.
+
+  consumerKey and certificate are deliberately absent — Salesforce generates the
+  key on create. Retrieve after deploying to read it.
+
+  isCodeCredFlowEnabled is the setting that actually turns on the web server
+  (authorization code) flow this app uses. Without it the authorize endpoint
+  rejects the request regardless of scopes.
+
+  isConsumerSecretOptional is true so setup can be fully scripted — Salesforce
+  will not release a consumer secret over any API, so a scripted deploy can only
+  ever obtain the key. Safe only because PKCE is mandatory below; together they
+  are the standard public-client configuration. Set a secret later to run as a
+  confidential client; the app supports both.
+
+  Scopes live on ExtlClntAppOauthSettings, not here.
+
+  Element order follows the XSD sequence (as retrieved from a working app) —
+  Salesforce rejects out-of-order elements.
+-->
+<ExtlClntAppGlobalOauthSettings xmlns="http://soap.sforce.com/2006/04/metadata">
+    <callbackUrl>https://triage.datajungle.io/api/auth/callback
+http://localhost:3000/api/auth/callback
+http://localhost:3111/api/auth/callback</callbackUrl>
+    <externalClientApplication>Field_Triage</externalClientApplication>
+    <isClientCredentialsFlowEnabled>false</isClientCredentialsFlowEnabled>
+    <isCodeCredFlowEnabled>true</isCodeCredFlowEnabled>
+    <isCodeCredPostOnly>false</isCodeCredPostOnly>
+    <isConsumerSecretOptional>true</isConsumerSecretOptional>
+    <isDeviceFlowEnabled>false</isDeviceFlowEnabled>
+    <isIntrospectAllTokens>false</isIntrospectAllTokens>
+    <isNamedUserJwtEnabled>false</isNamedUserJwtEnabled>
+    <isPkceRequired>true</isPkceRequired>
+    <isRefreshTokenRotationEnabled>false</isRefreshTokenRotationEnabled>
+    <isSecretRequiredForRefreshToken>false</isSecretRequiredForRefreshToken>
+    <isSecretRequiredForTokenExchange>true</isSecretRequiredForTokenExchange>
+    <isTokenExchangeEnabled>false</isTokenExchangeEnabled>
+    <label>Field_Triage_glbloauth</label>
+    <shouldRotateConsumerKey>false</shouldRotateConsumerKey>
+    <shouldRotateConsumerSecret>false</shouldRotateConsumerSecret>
+</ExtlClntAppGlobalOauthSettings>

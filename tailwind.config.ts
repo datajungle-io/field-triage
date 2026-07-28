@@ -1,11 +1,12 @@
 import type { Config } from "tailwindcss";
 
 // Brand tokens copied from datajungle.io/tailwind.config.ts so the lead magnet reads as
-// native Data Jungle. The `canopy` block below is additive: those are the hard-coded
+// native Data Jungle. The `dashboard` block below is additive: those are the hard-coded
 // hexes the real Field Triage dashboard uses in its page <style> blocks
-// (canopy-data-jungle/evidence/pages/metadata/field-triage.md). They differ slightly from
-// the marketing palette — the dashboard is the reference here, since this page is a clone
-// of it, so `canopy.lime` (#B5D333) is what the report uses, not brand `green.500`.
+// (instances/canopy-data-jungle/evidence/pages/metadata/field-triage.md — a repo path,
+// not a product name). They differ slightly from the marketing palette; the dashboard is
+// the reference here since this page is a clone of it, so `dashboard.lime` (#B5D333) is
+// what the report uses, not brand `green.500`.
 const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
@@ -39,8 +40,8 @@ const config: Config = {
         brown: { 100: "#F1E4D9", 500: "#7E3701", 700: "#552501" },
         forest: { DEFAULT: "#00381F", light: "#0A4A2C" },
 
-        // Canopy dashboard palette — semantic roles from the real Field Triage page.
-        canopy: {
+        // Dashboard palette — semantic roles from the real Field Triage page.
+        dashboard: {
           lime: "#B5D333", // primary accent, "healthy", "ready · 0 deps"
           jungle: "#0A4D3A", // deleted / confirmed-good values
           deep: "#0A2A1F", // CTA text on lime

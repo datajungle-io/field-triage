@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 /**
  * "Where is this used?" — the drill behind a dependency count.
  *
- * Laid out to match the production Canopy page
+ * Laid out to match the production Data Jungle page
  * (evidence/pages/metadata/field-triage/[object_name]/[field_api_name].md): one
  * flat table sorted by reference type, with count pills above it. Grouping the
  * rows into per-type sections seemed tidier but made a long list harder to scan

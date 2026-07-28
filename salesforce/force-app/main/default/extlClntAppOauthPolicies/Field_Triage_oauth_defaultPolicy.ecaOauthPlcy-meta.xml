@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Who may authorize this app, and under what conditions.
+
+  Salesforce auto-creates this record when the OAuth settings deploy; this file
+  brings it under source control and changes one thing.
+
+  permittedUsersPolicyType = AllSelfAuthorized is essential and is already the
+  default: a Salesforce admin from any org must be able to grant access
+  themselves. AdminApprovedPreAuthorized would require every prospective user's
+  org to pre-approve the app, which for a public lead magnet means nobody can
+  use it.
+
+  ipRelaxationPolicyType is changed from the default Enforce to Bypass. Users
+  connect from wherever they happen to be — not from an office network inside
+  their org's login IP ranges — and Enforce would fail those users at the
+  authorize step with an error they can't diagnose.
+
+  The refresh token settings are inert: this app never requests the
+  RefreshToken scope, so no refresh token is ever issued.
+-->
+<ExtlClntAppOauthConfigurablePolicies xmlns="http://soap.sforce.com/2006/04/metadata">
+    <externalClientApplication>Field_Triage</externalClientApplication>
+    <ipRelaxationPolicyType>Bypass</ipRelaxationPolicyType>
+    <isClientCredentialsFlowEnabled>false</isClientCredentialsFlowEnabled>
+    <isGuestCodeCredFlowEnabled>false</isGuestCodeCredFlowEnabled>
+    <isNamedUserJwtEnabled>false</isNamedUserJwtEnabled>
+    <isTokenExchangeFlowEnabled>false</isTokenExchangeFlowEnabled>
+    <label>Field_Triage_oauth_defaultPolicy</label>
+    <permittedUsersPolicyType>AllSelfAuthorized</permittedUsersPolicyType>
+    <refreshTokenPolicyType>SpecificLifetime</refreshTokenPolicyType>
+    <refreshTokenValidityPeriod>365</refreshTokenValidityPeriod>
+    <refreshTokenValidityUnit>Days</refreshTokenValidityUnit>
+    <requiredSessionLevel>STANDARD</requiredSessionLevel>
+</ExtlClntAppOauthConfigurablePolicies>

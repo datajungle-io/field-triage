@@ -238,7 +238,7 @@ export default async function FieldTriagePage({ params }: { params: { token: str
       )}
 
       <div className="hero" style={{ marginTop: "2.5rem" }}>
-        <div className="hero-eyebrow">This is one page of Canopy</div>
+        <div className="hero-eyebrow">This is one page of Data Jungle</div>
         <h2 className="hero-title">Want the other pages — and the deletions tracked?</h2>
         <p className="hero-sub">
           Profile Triage, Report Triage, dependency remediation, and a nightly re-scan so

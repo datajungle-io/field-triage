@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  External Client App for the Field Triage lead magnet.
+
+  ECAs replace Connected Apps, which Salesforce is deprecating — creation is
+  already disabled by default in newer orgs (the CS Toolkit PBO among them) and
+  only re-enabled by a support case. Building on the successor avoids shipping
+  on a technology that is on its way out.
+
+  Split across four metadata types by design:
+    ExternalClientApplication            the app itself (this file)
+    ExtlClntAppGlobalOauthSettings       consumer key, callback, scopes
+    ExtlClntAppOauthSettings             enables the OAuth plugin in this org
+    ExtlClntAppOauthConfigurablePolicies who may authorize, IP relaxation
+-->
+<ExternalClientApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <contactEmail>brendan@datajungle.io</contactEmail>
+    <description>Free Salesforce field audit by Data Jungle. Reads field metadata and aggregate record counts only — never field values — and writes nothing.</description>
+    <distributionState>Local</distributionState>
+    <isProtected>false</isProtected>
+    <label>Data Jungle Field Triage</label>
+</ExternalClientApplication>

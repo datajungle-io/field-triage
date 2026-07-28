@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /**
- * The Canopy chrome — a hand-coded equivalent of Evidence's default layout and
+ * The Data Jungle chrome — a hand-coded equivalent of Evidence's default layout and
  * Sidebar.svelte, which generates its tree from the pages/ directory.
  *
  * Profile Triage and Report Triage are rendered but locked. They exist in the

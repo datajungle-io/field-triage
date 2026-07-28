@@ -1,6 +1,6 @@
 # Netlify build config for the Field Triage lead magnet.
 #
-# Matches how Canopy already deploys (canopy-data-jungle/netlify.toml). The
+# Matches how the Data Jungle dashboards already deploy (canopy-data-jungle/netlify.toml). The
 # Next.js runtime plugin turns route handlers and server components into
 # functions automatically — no manual function wiring beyond the scheduled
 # resume below.
