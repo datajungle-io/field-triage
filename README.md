@@ -102,18 +102,48 @@ RLS) and does not protect `purge_expired_scans` (RPC-callable, and it DELETEs). 
 migration revokes everything from `anon` and `authenticated`, including default privileges
 so a later migration can't reopen it.
 
-### 2. Salesforce Connected App
+### 2. Salesforce External Client App
 
-Setup → App Manager → New Connected App, in a Developer Edition or Dev Hub org:
+Deployed as metadata from `salesforce/`, not clicked through Setup, so the configuration is
+reviewable and reproducible:
 
-- Enable OAuth Settings
-- Callback URL: `https://triage.datajungle.io/api/auth/callback`
-- Scopes: **Manage user data via APIs (api)** and **Access the identity URL service (id,
-  profile, email)**
-- **Do not** select "Perform requests at any time (refresh_token, offline_access)"
-- Require PKCE: enabled
-- Manage → Permitted Users: *All users may self-authorize*
-- Manage → IP Relaxation: *Relax IP restrictions*
+```bash
+cd salesforce
+sf project deploy start --target-org <alias> \
+  --metadata ExternalClientApplication ExtlClntAppGlobalOauthSettings ExtlClntAppOauthSettings
+
+# Salesforce generates the consumer key on create — retrieve to read it
+sf project retrieve start --target-org <alias> \
+  --metadata ExtlClntAppGlobalOauthSettings:Field_Triage_glbloauth \
+  --target-metadata-dir /tmp/eca
+# then unzip and read <consumerKey> into SF_CLIENT_ID
+
+# finally, the policy (Salesforce auto-creates a default; this overrides IP relaxation)
+sf project deploy start --target-org <alias> --metadata ExtlClntAppOauthConfigurablePolicies
+```
+
+**Not a Connected App.** Salesforce is deprecating those — creation is already disabled by
+default in newer orgs and only re-enabled by a support case. External Client Apps are the
+successor. If you ever need to look at the old definition, it's still in
+`connectedApps/Field_Triage.connectedApp-meta.xml`.
+
+Things that cost time to discover, preserved here so they don't have to be rediscovered:
+
+- **Naming is by convention**, not just the `externalClientApplication` field:
+  `<App>_glbloauth`, `<App>_oauth`, and the auto-created `<App>_oauth_defaultPolicy`.
+- **Scopes are `commaSeparatedOauthScopes`** — a single comma-separated string, not
+  repeated `<scopes>` elements as in ConnectedApp — and they live on
+  `ExtlClntAppOauthSettings`, not the global settings.
+- **`isCodeCredFlowEnabled`** is what enables the web server (authorization code) flow.
+  Without it the authorize endpoint rejects the request whatever the scopes say.
+- **`permittedUsersPolicyType` is `AllSelfAuthorized`.** `AdminApprovedPreAuthorized` would
+  require every prospective user's org to pre-approve the app — for a public lead magnet,
+  that means nobody can use it.
+- **`ipRelaxationPolicyType` must be `Bypass`.** The auto-created default is `Enforce`,
+  which fails any user whose org has login IP ranges, at the authorize step, with an error
+  they can't diagnose.
+- **Element order follows the XSD sequence.** Out-of-order elements are rejected outright.
+- New apps take **2–5 minutes to propagate**; `invalid_client_id` before then is expected.
 
 The consumer key works cross-org. Only orgs with API Access Control enabled need to
 whitelist it explicitly.
@@ -255,7 +285,13 @@ verify the consent screen, PKCE, and that revocation actually fires.
   quietly undercounting.
 - **CLI session preserved.** `token_revoked_at` is null for `is_cli_session` scans and
   `sf org display` still reports `Connected` afterwards.
-- **Census semantics.** `npm run test:schema`, 22 assertions.
+- **OAuth path, end to end**, against the External Client App in the CS Toolkit PBO: state
+  and PKCE validated, token exchanged with no client secret, lead captured from the identity
+  endpoint with no form, all 9 phases green (141/142 reports, 31/31 report types).
+- **Revocation, proven not inferred.** The access token was captured mid-scan and replayed
+  after `finalize`: `401 INVALID_SESSION_ID` on both REST and Tooling. The connect screen's
+  promise holds.
+- **Census semantics.** `npm run test:schema`, 30 assertions.
 
 ### Still open
 
@@ -269,8 +305,9 @@ verify the consent screen, PKCE, and that revocation actually fires.
    executed against real data.
 4. **Resumability.** Cursors advanced across many ticks, but a hard kill mid-report-sweep
    followed by cron resume has not been tested.
-5. **OAuth path.** Consent screen, PKCE, and revocation are all untested — the CLI path
-   bypasses them entirely.
+5. **Custom objects.** Not scanned at all, by design — but an org whose real cruft sits on
+   `Widget__c` gets a report covering little of what matters. State it, don't let people
+   discover it.
 
 ## Known gaps, disclosed in-product
 
