@@ -1,0 +1,866 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+ * Canopy surface tokens.
+ *
+ * Evidence computes these from evidence.config.yaml and emits them as --twc-*
+ * HSL triplets. They are reproduced here as literals (read out of the built
+ * Evidence CSS) so the styles lifted from field-triage.md work unchanged apart
+ * from the variable prefix — keeping the diff against the real dashboard small
+ * enough to eyeball.
+ * ------------------------------------------------------------------------- */
+
+:root {
+  --base-100: 0 0% 100%;
+  --base-200: 0 0% 96.9%;
+  --base-300: 0 0% 83.9%;
+  --base-content: 0 0% 17.3%;
+  --base-heading: 0 0% 2.4%;
+
+  --font-sans: "Mozilla Text", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --base-100: 214.3 28% 9.8%;
+    --base-200: 216 24.6% 12%;
+    --base-300: 217.5 14.3% 22%;
+    --base-content: 240 1.9% 79.6%;
+    --base-heading: 240 16.7% 97.6%;
+  }
+}
+
+html {
+  background-color: hsl(var(--base-100));
+  color: hsl(var(--base-content));
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------------------
+ * App shell — hand-coded from Evidence's Sidebar.svelte behaviour. Fixed w-48
+ * rail, uppercase section headers, muted leaves, lime active state.
+ * ------------------------------------------------------------------------- */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid hsl(var(--base-300));
+  background-color: hsl(var(--base-100));
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.app-sidebar {
+  width: 12rem;
+  flex: none;
+  padding: 1.75rem 0 2rem 1.25rem;
+  font-size: 0.875rem;
+}
+
+.app-sidebar .nav-section {
+  /* Evidence uppercases these via an app.css override on .font-semibold. */
+  text-transform: uppercase;
+  font-weight: 600;
+  color: hsl(var(--base-heading));
+  display: block;
+  margin-bottom: 0.25rem;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+
+.app-sidebar .nav-group {
+  margin-bottom: 1.5rem;
+}
+
+.app-sidebar .nav-leaf {
+  display: block;
+  padding: 0.25rem 0;
+  color: hsl(var(--base-content) / 0.6);
+  text-decoration: none;
+  transition: color 0.1s ease-in-out;
+}
+
+.app-sidebar .nav-leaf:hover {
+  color: hsl(var(--base-content));
+}
+
+.app-sidebar .nav-leaf.active {
+  color: #b5d333;
+  font-weight: 600;
+}
+
+.app-sidebar .nav-leaf.locked {
+  color: hsl(var(--base-content) / 0.32);
+  cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.app-sidebar .nav-sub {
+  padding-left: 0.75rem;
+  border-left: 1px solid hsl(var(--base-300));
+  margin-left: 1px;
+}
+
+.app-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 1.75rem 2rem 4rem;
+  max-width: 1400px;
+}
+
+.breadcrumb {
+  font-size: 0.8rem;
+  color: hsl(var(--base-content) / 0.5);
+  margin-bottom: 0.75rem;
+}
+
+.breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: hsl(var(--base-heading));
+  margin-bottom: 0.35rem;
+}
+
+.page-intro {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: hsl(var(--base-content) / 0.7);
+  margin-bottom: 1rem;
+  max-width: 85ch;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: hsl(var(--base-heading));
+  margin: 2rem 0 0.5rem;
+}
+
+.section-note {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: hsl(var(--base-content) / 0.75);
+  margin-bottom: 0.75rem;
+  max-width: 100ch;
+}
+
+.back-link {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: hsl(var(--base-content) / 0.7);
+  text-decoration: none;
+  margin-bottom: 1rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------------------
+ * KPI tiles — lifted from evidence/pages/metadata/field-triage.md:228-238
+ * ------------------------------------------------------------------------- */
+
+.kpi-tiles {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin: 1rem 0 1.5rem;
+}
+
+@media (max-width: 1000px) {
+  .kpi-tiles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.kpi-tile {
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid hsl(var(--base-300));
+  background-color: hsl(var(--base-100));
+}
+
+.kpi-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color 0.12s ease-in-out,
+    box-shadow 0.12s ease-in-out;
+}
+
+.kpi-link:hover {
+  border-color: #b5d333;
+  box-shadow: 0 0 0 1px #b5d333;
+  text-decoration: none;
+}
+
+.tile-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: hsl(var(--base-content));
+  font-variant-numeric: tabular-nums;
+}
+
+.tile-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  color: hsl(var(--base-content));
+}
+
+.tile-sub {
+  font-size: 0.7rem;
+  margin-top: 0.2rem;
+  color: hsl(var(--base-content) / 0.5);
+}
+
+.tile-red .tile-value {
+  color: #f07070;
+}
+.tile-lime .tile-value {
+  color: #b5d333;
+}
+.tile-green .tile-value {
+  color: #0a4d3a;
+}
+.tile-amber .tile-value {
+  color: #f5b731;
+}
+
+/* A value still being refined by a later phase. Reads as "not final yet"
+   without implying the number shown is wrong. */
+.tile-pending .tile-value {
+  opacity: 0.45;
+}
+
+.pending-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #89cff0;
+  margin-top: 0.25rem;
+}
+
+.pending-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #89cff0;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Census table — lifted from field-triage.md:241-250
+ * ------------------------------------------------------------------------- */
+
+.census-table {
+  overflow-x: auto;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.census-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.census-table th {
+  padding: 8px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: hsl(var(--base-content) / 0.5);
+  border-bottom: 2px solid hsl(var(--base-300));
+  white-space: nowrap;
+}
+
+.census-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid hsl(var(--base-300) / 0.6);
+  vertical-align: middle;
+}
+
+.census-table tr:hover td {
+  background-color: hsl(var(--base-200) / 0.4);
+}
+
+.census-table th.th-num,
+.num-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.census-table th.th-mid,
+.split-cell,
+.health-cell {
+  text-align: center;
+}
+
+.split-cell {
+  font-size: 0.75rem;
+  color: hsl(var(--base-content) / 0.6);
+  white-space: nowrap;
+}
+
+.health-cell .health-bar {
+  margin: 0 auto;
+}
+
+.obj-link {
+  font-weight: 600;
+  color: hsl(var(--base-content));
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.obj-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.obj-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  background-color: #94a3b8;
+}
+
+/* ---------------------------------------------------------------------------
+ * Health distribution bar — field-triage.md:270-280
+ * ------------------------------------------------------------------------- */
+
+.health-bar {
+  display: flex;
+  width: 140px;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: hsl(var(--base-200));
+}
+
+.seg {
+  flex-basis: 0;
+}
+
+.seg-dead {
+  background-color: #f07070;
+}
+.seg-low {
+  background-color: #f5b731;
+}
+.seg-partial {
+  background-color: #89cff0;
+}
+.seg-healthy {
+  background-color: #b5d333;
+}
+/* Custom fields with no population measurement (object has no records). */
+.seg-nodata {
+  background-color: hsl(var(--base-content) / 0.28);
+}
+/* Objects with no custom fields — deliberately fainter than no-data so the two
+   legend chips don't read alike. */
+.seg-none {
+  background-color: hsl(var(--base-content) / 0.1);
+}
+
+.legend {
+  font-size: 0.72rem;
+  color: hsl(var(--base-content) / 0.5);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.legend-chip {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Tooltip — field-triage.md:283-285
+ * ------------------------------------------------------------------------- */
+
+.info-tip {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+  color: hsl(var(--base-content) / 0.45);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  outline: none;
+}
+
+.info-tip-text {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+  position: absolute;
+  z-index: 30;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-72%);
+  width: 280px;
+  background-color: hsl(var(--base-100));
+  color: hsl(var(--base-content) / 0.85);
+  border: 1px solid hsl(var(--base-300));
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: normal;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+  text-align: left;
+}
+
+.info-tip:hover .info-tip-text,
+.info-tip:focus .info-tip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------
+ * Value emphasis — field-triage.md:288-293
+ * ------------------------------------------------------------------------- */
+
+.metric-link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: hsl(var(--base-content) / 0.25);
+}
+
+.metric-link:hover {
+  text-decoration-color: currentColor;
+}
+
+.val-ready {
+  color: #f07070;
+  font-weight: 700;
+}
+.val-noDeps {
+  color: #b5d333;
+  font-weight: 700;
+}
+.val-deleted {
+  color: #0a4d3a;
+  font-weight: 700;
+}
+.val-zero {
+  color: hsl(var(--base-content) / 0.3);
+}
+.val-unknown {
+  color: hsl(var(--base-content) / 0.25);
+}
+
+/* ---------------------------------------------------------------------------
+ * Pills and badges — from field-triage/detail.md:449-478
+ * ------------------------------------------------------------------------- */
+
+.field-name {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: hsl(var(--base-content));
+}
+
+.date-cell {
+  color: hsl(var(--base-content) / 0.6);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  background-color: hsl(var(--base-200));
+  color: hsl(var(--base-content) / 0.7);
+}
+
+.ns-pill {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background-color: rgba(123, 79, 160, 0.12);
+  color: #7b4fa0;
+}
+
+.bucket-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.bucket-dead {
+  background-color: rgba(240, 112, 112, 0.15);
+  color: #f07070;
+}
+.bucket-low {
+  background-color: rgba(245, 183, 49, 0.15);
+  color: #f5b731;
+}
+.bucket-partial {
+  background-color: rgba(137, 207, 240, 0.15);
+  color: #89cff0;
+}
+.bucket-healthy {
+  background-color: rgba(181, 211, 51, 0.12);
+  color: #b5d333;
+}
+.bucket-no-data {
+  background-color: hsl(var(--base-content) / 0.08);
+  color: hsl(var(--base-content) / 0.5);
+}
+
+.dep-link {
+  display: inline-block;
+  min-width: 1.6rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #7b4fa0;
+  text-decoration: none;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background-color: rgba(123, 79, 160, 0.1);
+}
+
+.dep-link:hover {
+  background-color: rgba(123, 79, 160, 0.22);
+  text-decoration: none;
+}
+
+.dep-link.dep-zero {
+  color: hsl(var(--base-content) / 0.45);
+  background-color: hsl(var(--base-200));
+  font-weight: 600;
+}
+
+.ready-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #b5d333;
+}
+
+/* ---------------------------------------------------------------------------
+ * "Where is this used?" — lifted from
+ * evidence/pages/metadata/field-triage/[object_name]/[field_api_name].md:224-257
+ * ------------------------------------------------------------------------- */
+
+.field-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0.5rem 0 0.4rem;
+  color: hsl(var(--base-content));
+}
+
+.wiu-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: -0.25rem 0 1rem;
+  flex-wrap: wrap;
+}
+
+.obj-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: rgba(127, 141, 225, 0.15);
+  color: #7f8de1;
+}
+
+.setup-link {
+  color: #f07070;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.setup-link:hover {
+  text-decoration: underline;
+}
+
+.type-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0 1rem;
+}
+
+.type-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  background-color: rgba(123, 79, 160, 0.1);
+  color: #7b4fa0;
+}
+
+.type-pill strong {
+  font-weight: 800;
+}
+
+.detail-cell {
+  color: hsl(var(--base-content) / 0.6);
+  font-size: 0.75rem;
+}
+
+.ref-link {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: hsl(var(--base-content) / 0.35);
+  color: inherit;
+}
+
+.ref-link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Colour per reference type so the eye can group a long flat list without it
+   needing to be physically grouped. */
+.ref-type {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background-color: hsl(var(--base-200));
+  color: hsl(var(--base-content) / 0.7);
+}
+
+.ref-Layout {
+  background-color: rgba(137, 207, 240, 0.18);
+  color: #4a90b8;
+}
+.ref-Report {
+  background-color: rgba(181, 211, 51, 0.16);
+  color: #7a9410;
+}
+.ref-ReportType {
+  background-color: rgba(245, 183, 49, 0.16);
+  color: #c08c14;
+}
+.ref-FlexipageFieldInstance {
+  background-color: rgba(123, 79, 160, 0.12);
+  color: #7b4fa0;
+}
+.ref-ApexClass,
+.ref-ApexTrigger {
+  background-color: rgba(240, 112, 112, 0.14);
+  color: #f07070;
+}
+.ref-Flow,
+.ref-ValidationRule {
+  background-color: rgba(10, 77, 58, 0.12);
+  color: #0a4d3a;
+}
+
+/* The production dashboard is authored light-first, and three of these badge
+   colours are dark inks that vanish against a dark surface — #0A4D3A on
+   near-black is effectively unreadable. Lift them for dark mode rather than
+   changing the light palette, so both match the original where it works. */
+@media (prefers-color-scheme: dark) {
+  .ref-Flow,
+  .ref-ValidationRule {
+    background-color: rgba(75, 192, 118, 0.16);
+    color: #4bc076;
+  }
+  .ref-Report {
+    background-color: rgba(181, 211, 51, 0.18);
+    color: #b5d333;
+  }
+  .ref-ReportType {
+    background-color: rgba(245, 183, 49, 0.18);
+    color: #f5b731;
+  }
+  .ref-Layout {
+    background-color: rgba(137, 207, 240, 0.18);
+    color: #89cff0;
+  }
+  .ref-FlexipageFieldInstance {
+    background-color: rgba(160, 148, 237, 0.18);
+    color: #a094ed;
+  }
+}
+
+.empty-state {
+  font-size: 0.85rem;
+  color: hsl(var(--base-content) / 0.5);
+  padding: 1rem 0;
+  font-style: italic;
+}
+
+.coverage-note {
+  font-size: 0.75rem;
+  color: hsl(var(--base-content) / 0.6);
+  background-color: rgba(245, 183, 49, 0.08);
+  border: 1px solid rgba(245, 183, 49, 0.3);
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  margin: 0.5rem 0 1.5rem;
+  max-width: 720px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Coverage banner — the ⚠ disclosure. A dependency count built on an
+ * incomplete scan is the one number this report must never present as final
+ * without saying so.
+ * ------------------------------------------------------------------------- */
+
+.coverage-banner {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid hsl(var(--base-300));
+  border-left: 4px solid #f5b731;
+  border-radius: 6px;
+  background-color: hsl(var(--base-100));
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.coverage-banner strong {
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.coverage-banner ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  color: hsl(var(--base-content) / 0.7);
+}
+
+/* ---------------------------------------------------------------------------
+ * Hero / cards — app.css:350-427
+ * ------------------------------------------------------------------------- */
+
+.hero {
+  border-radius: 10px;
+  border: 1px solid hsl(var(--base-300));
+  background-color: hsl(var(--base-100));
+  padding: 2rem 2.25rem;
+  margin: 0.5rem 0 1.5rem;
+}
+
+.hero-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b5d333;
+  margin-bottom: 0.6rem;
+}
+
+.hero-title {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+  color: hsl(var(--base-heading));
+}
+
+.hero-sub {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  max-width: 70ch;
+  color: hsl(var(--base-content) / 0.7);
+  margin: 0;
+}
+
+.hero-cta {
+  display: inline-block;
+  background-color: #b5d333;
+  color: #0a2a1f;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: filter 0.12s ease-in-out;
+  margin-top: 1.25rem;
+  border: none;
+  cursor: pointer;
+}
+
+.hero-cta:hover {
+  filter: brightness(1.06);
+  text-decoration: none;
+}
+
+.hero-cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,0 +1,19 @@
+node_modules/
+.next/
+out/
+build/
+.DS_Store
+*.pem
+.env
+.env*.local
+.vercel
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# Salesforce CLI local state — machine-specific, not part of the app
+salesforce/.sf/
+salesforce/.sfdx/
+
+# Supabase CLI local stack state
+supabase/.branches/
+supabase/.temp/
