@@ -1,6 +1,6 @@
 import { chunk, mapLimit } from "@/lib/concurrency";
 import { makeObjectResolver, type TrackedField } from "@/lib/salesforce/resolver";
-import type { PhaseContext, PhaseResult } from "@/lib/scan/types";
+import { outOfTime, type PhaseContext, type PhaseResult } from "@/lib/scan/types";
 import { loadCustomFieldIndex } from "@/lib/scan/phases/shared";
 
 /**
@@ -63,6 +63,13 @@ export async function runReports(ctx: PhaseContext): Promise<PhaseResult> {
   let referenceCount = 0;
 
   for (const sub of chunk(slice, PROGRESS_BATCH)) {
+    // Yield between sub-batches once the budget is spent. Without this the tick
+    // is killed mid-batch on a host with a tight function ceiling — and because
+    // the cursor only advances via the returned result, the next tick would
+    // redo the same reports forever. Bounded work per tick is what makes the
+    // resumable design actually resumable.
+    if (processed > startIndex && outOfTime(ctx)) break;
+
     const results = await mapLimit(sub, REPORT_CONCURRENCY, async (report) => {
       const described = await ctx.sf.describeReport(report.Id);
       return { report, metadata: described.reportMetadata ?? {} };
@@ -123,11 +130,12 @@ export async function runReports(ctx: PhaseContext): Promise<PhaseResult> {
       .eq("phase", "reports");
   }
 
-  const nextIndex = startIndex + slice.length;
+  // `processed`, not startIndex + slice.length: the loop may have yielded early.
+  const nextIndex = processed;
   const done = nextIndex >= reports.length;
 
   ctx.log(
-    `report_scan: ${referenceCount} references from ${slice.length} reports ` +
+    `report_scan: ${referenceCount} references from ${nextIndex - startIndex} reports ` +
       `(${nextIndex}/${reports.length}, ${failed} inaccessible)`,
   );
 

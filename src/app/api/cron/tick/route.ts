@@ -4,6 +4,8 @@ import { serviceClient } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Vercel-only hint; Netlify ignores it and applies its own plan ceiling, which
+// is why CRON_BUDGET_MS below is what actually bounds the work.
 export const maxDuration = 300;
 
 /**
@@ -17,7 +19,16 @@ export const maxDuration = 300;
  * could plausibly take.
  */
 const STALL_THRESHOLD_MS = 90_000;
-const CRON_BUDGET_MS = 240_000;
+
+/**
+ * How long this endpoint keeps ticking before returning.
+ *
+ * Must sit inside the host's function ceiling like everything else — Netlify
+ * allows 10s free / 26s Pro, Vercel Pro 300s. Running short just means an
+ * abandoned scan advances a little each minute instead of finishing in one
+ * sweep; it still finishes.
+ */
+const CRON_BUDGET_MS = Number(process.env.CRON_BUDGET_MS ?? 20_000);
 
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;

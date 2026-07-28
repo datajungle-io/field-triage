@@ -1,0 +1,30 @@
+# Netlify build config for the Field Triage lead magnet.
+#
+# Matches how Canopy already deploys (canopy-data-jungle/netlify.toml). The
+# Next.js runtime plugin turns route handlers and server components into
+# functions automatically — no manual function wiring beyond the scheduled
+# resume below.
+#
+# FUNCTION TIMEOUTS are the thing to get right here. Netlify caps synchronous
+# functions at 10s (free) and up to 26s (Pro, configurable). The scan is a
+# resumable job precisely so this ceiling doesn't matter — a smaller budget just
+# means more, shorter ticks — but SCAN_TICK_BUDGET_MS must sit inside it or
+# ticks get killed before they can persist their cursor.
+#
+#   Netlify free  ->  SCAN_TICK_BUDGET_MS = 7000
+#   Netlify Pro   ->  SCAN_TICK_BUDGET_MS = 20000
+#
+# Set it in the site environment, not here, so it can differ per context.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  node_bundler = "esbuild"
