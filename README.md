@@ -214,7 +214,7 @@ It prints an API URL and keys. Put them in `.env.local`:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-SUPABASE_SERVICE_ROLE_KEY=<service_role key from the output>
+SUPABASE_SECRET_KEY=<service_role key from the output>
 SUPABASE_DB_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
 
