@@ -17,3 +17,6 @@ salesforce/.sfdx/
 # Supabase CLI local stack state
 supabase/.branches/
 supabase/.temp/
+
+# Local Netlify folder
+.netlify

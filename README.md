@@ -213,7 +213,7 @@ npx supabase start     # applies supabase/migrations automatically on first run
 It prints an API URL and keys. Put them in `.env.local`:
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_SECRET_KEY=<service_role key from the output>
 SUPABASE_DB_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 ```
