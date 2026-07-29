@@ -26,6 +26,31 @@ export function useScanTicker(
   const onTickRef = useRef(options.onTick);
   onTickRef.current = options.onTick;
 
+  // Poll progress independently of ticking. A tick holds its connection for up
+  // to ~20s, so a UI that only learns about progress from tick responses sits
+  // frozen for that entire window — counters don't move and the whole page
+  // looks stalled even though the scan is working.
+  useEffect(() => {
+    if (!enabled || initial.complete) return;
+    let cancelled = false;
+
+    const id = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/scan/${token}/progress`, { cache: "no-store" });
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as { progress: ScanProgress };
+        setProgress(data.progress);
+      } catch {
+        // Transient; the next poll picks it up. The scan is server-side.
+      }
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [token, enabled, initial.complete]);
+
   useEffect(() => {
     if (!enabled || initial.complete) return;
 

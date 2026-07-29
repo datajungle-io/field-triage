@@ -23,6 +23,10 @@ export function ScanProgressView({
   const router = useRouter();
   const { progress, error } = useScanTicker(token, initialProgress);
 
+  const settled = (s: string) => s === "complete" || s === "failed" || s === "skipped";
+  const firstUnsettled = progress.phases.findIndex((p) => !settled(p.status));
+  const currentIndex = firstUnsettled === -1 ? progress.phases.length : firstUnsettled;
+
   useEffect(() => {
     if (progress.reportReady) router.replace(`/r/${token}`);
   }, [progress.reportReady, router, token]);
@@ -43,8 +47,15 @@ export function ScanProgressView({
         </div>
       )}
 
+      {/*
+        The first unsettled phase is "the current step" whether or not its row
+        says running. Between ticks nothing is marked running — the previous one
+        finished and the next hasn't claimed itself yet — so keying the spinner
+        off the database status alone leaves the page looking stalled at exactly
+        the moment it's handing off.
+      */}
       <ul style={{ listStyle: "none", padding: 0, margin: "2rem 0 0" }}>
-        {progress.phases.map((phase) => (
+        {progress.phases.map((phase, i) => (
           <li
             key={phase.phase}
             style={{
@@ -54,11 +65,13 @@ export function ScanProgressView({
               padding: "0.6rem 0",
               borderBottom: "1px solid hsl(var(--base-300) / 0.5)",
               fontSize: "0.9rem",
-              opacity: phase.status === "pending" ? 0.4 : 1,
+              opacity: i === currentIndex || phase.status !== "pending" ? 1 : 0.4,
             }}
           >
-            <StatusGlyph status={phase.status} />
-            <span style={{ flex: 1 }}>{phase.label}</span>
+            <StatusGlyph status={i === currentIndex ? "running" : phase.status} />
+            <span style={{ flex: 1, fontWeight: i === currentIndex ? 600 : 400 }}>
+              {phase.label}
+            </span>
             <span
               style={{
                 fontVariantNumeric: "tabular-nums",

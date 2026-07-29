@@ -76,7 +76,9 @@ export function ScanStatusStrip({
   if (done) return null;
 
   const remaining = refPhases.filter((p) => !settled(p.status)).length;
-  const running = refPhases.find((p) => p.status === "running");
+  const firstUnsettled = refPhases.findIndex((p) => !settled(p.status));
+  const currentIndex = firstUnsettled === -1 ? refPhases.length : firstUnsettled;
+  const running = refPhases[currentIndex];
 
   return (
     <div className="coverage-banner" style={{ borderLeftColor: "#89CFF0" }}>
@@ -105,17 +107,19 @@ export function ScanStatusStrip({
             fontSize: "0.75rem",
           }}
         >
-          {refPhases.map((phase) => (
+          {refPhases.map((phase, i) => (
             <span
               key={phase.phase}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.35rem",
-                opacity: phase.status === "pending" ? 0.45 : 1,
+                opacity: i === currentIndex || phase.status !== "pending" ? 1 : 0.45,
               }}
             >
-              <Glyph status={phase.status} />
+              {/* First unsettled phase is the current step, even between ticks
+                  when nothing is marked running. */}
+              <Glyph status={i === currentIndex ? "running" : phase.status} />
               {SHORT_LABELS[phase.phase] ?? phase.label}
               {phase.total > 0 && (
                 <span

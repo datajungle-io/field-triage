@@ -61,7 +61,9 @@ body {
   align-items: center;
   justify-content: space-between;
   height: 52px;
-  padding: 0 1.25rem;
+  /* Right padding matches .app-main so the CTA lines up with the right edge of
+     the KPI tiles and the table, rather than floating past them. */
+  padding: 0 2rem 0 1.25rem;
   border-bottom: 1px solid hsl(var(--base-300));
   background-color: hsl(var(--base-100));
   font-weight: 700;
@@ -125,7 +127,8 @@ body {
   flex: 1 1 auto;
   min-width: 0;
   padding: 1.75rem 2rem 4rem;
-  max-width: 1400px;
+  /* No max-width: this is a dashboard, and capping the content while the topbar
+     spans the viewport left the CTA stranded away from the tiles it sits above. */
 }
 
 .breadcrumb {
@@ -156,7 +159,10 @@ body {
   font-size: 0.9rem;
   color: hsl(var(--base-content) / 0.7);
   margin-bottom: 1rem;
-  max-width: 85ch;
+  /* Deliberately unconstrained. A 85ch measure is better for prose, but next to
+     full-width tiles and tables it read as a broken column — the eye reads the
+     ragged early wrap as a mistake rather than as typography. These are two-line
+     intros, so the readability cost is small and the consistency gain isn't. */
 }
 
 .section-title {
@@ -171,7 +177,6 @@ body {
   line-height: 1.55;
   color: hsl(var(--base-content) / 0.75);
   margin-bottom: 0.75rem;
-  max-width: 100ch;
 }
 
 .back-link {
