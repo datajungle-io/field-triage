@@ -21,25 +21,51 @@ the scan completes normally. Nothing here blocks shipping.
 | `Email` | The verified address from the OAuth identity endpoint |
 | `Description` | Report URL, scan date, org edition |
 | `Field_Triage_Org_Id__c` | The 18-char org ID — the upsert key |
-| `LeadSource` | Only if `CRM_LEAD_SOURCE` is set (see note below) |
+| `LeadSource` | `Website` (override with `CRM_LEAD_SOURCE`) |
+| `Website_Form__c` | `Field Triage` (override with `CRM_WEBSITE_FORM`) |
 
 Deliberately no field counts. The numbers live in the report; duplicating them
 onto the Lead means they go stale the next time the org is scanned.
 
 CLI-session scans never push — our own test runs are not leads.
 
-## 1. Deploy the custom field
+## 1. Deploy the custom field and permission set — DONE
 
 ```bash
 cd salesforce/crm-pbo
 sf project deploy start --target-org pbo --source-dir force-app
+sf org assign permset --name Field_Triage_CRM_Writer --target-org pbo
 ```
+
+Already applied to the PBO. Both steps are required, and the second is the
+non-obvious one.
 
 `Field_Triage_Org_Id__c` is Text(18), **External Id** and **Unique**. Both flags
 are load-bearing: the app PATCHes
 `/sobjects/Lead/Field_Triage_Org_Id__c/{orgId}` and lets Salesforce decide
 insert-vs-update. Without them that endpoint 400s and every re-scan would create
 a duplicate Lead.
+
+> **A Metadata API field deploy grants field-level security to nobody** — not
+> even System Administrator. The deploy reports `Created` and the field is
+> genuinely there in the Tooling API, but it is absent from
+> `sobjects/Lead/describe` and every write to it fails with `INVALID_FIELD`.
+> Deploying via the UI hides this, because the UI's FLS checkboxes are a
+> separate step that the Metadata API has no equivalent for.
+>
+> `Field_Triage_CRM_Writer` is what makes the field visible. **Assign it to the
+> JWT integration user**, whoever that ends up being — assigning it to yourself
+> is not enough if the integration runs as someone else.
+
+Verify with:
+
+```bash
+sf data query --target-org pbo \
+  --query "SELECT Parent.Profile.Name, PermissionsEdit FROM FieldPermissions \
+           WHERE SobjectType='Lead' AND Field='Lead.Field_Triage_Org_Id__c'"
+```
+
+Zero rows means nothing can see the field, whatever the deploy said.
 
 ## 2. Certificate
 

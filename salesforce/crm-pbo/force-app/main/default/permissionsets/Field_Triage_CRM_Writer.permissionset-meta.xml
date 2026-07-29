@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Field Triage CRM Writer</label>
+    <!-- A Metadata API CustomField deploy grants FLS to nobody, not even System
+         Administrator: the field exists but is invisible to the API and the
+         upsert fails with INVALID_FIELD. This permission set is what makes it
+         visible. Assign it to the JWT integration user. -->
+    <description>Grants access to the Field Triage org ID field on Lead, written by triage.datajungle.io. Assign to the JWT integration user — a Metadata API field deploy grants no field-level security on its own.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <fieldPermissions>
+        <field>Lead.Field_Triage_Org_Id__c</field>
+        <editable>true</editable>
+        <readable>true</readable>
+    </fieldPermissions>
+</PermissionSet>

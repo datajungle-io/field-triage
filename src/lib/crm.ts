@@ -32,6 +32,15 @@ const PUBLIC_ORIGIN = (process.env.PUBLIC_APP_URL ?? "https://triage.datajungle.
 /** The External Id field the upsert keys on. See salesforce/crm-pbo/. */
 const ORG_ID_FIELD = "Field_Triage_Org_Id__c";
 
+/**
+ * Attribution. Both verified against the PBO before being hardcoded:
+ * `Website` is an existing active LeadSource value, and Website_Form__c is a
+ * plain text field, so neither can fail picklist validation. Overridable by
+ * environment in case the taxonomy changes without a deploy.
+ */
+const LEAD_SOURCE = process.env.CRM_LEAD_SOURCE ?? "Website";
+const WEBSITE_FORM = process.env.CRM_WEBSITE_FORM ?? "Field Triage";
+
 interface CrmConfig {
   clientId: string;
   username: string;
@@ -182,10 +191,8 @@ export async function pushLeadToCrm(scanId: string, opts: { strict?: boolean } =
     ].join("\n"),
   };
   if (first) record.FirstName = first;
-
-  // LeadSource is a restricted picklist in many orgs, where an unknown value is
-  // a hard failure. Opt-in only, so a misconfigured value can't cost a lead.
-  if (process.env.CRM_LEAD_SOURCE) record.LeadSource = process.env.CRM_LEAD_SOURCE;
+  if (LEAD_SOURCE) record.LeadSource = LEAD_SOURCE;
+  if (WEBSITE_FORM) record.Website_Form__c = WEBSITE_FORM;
 
   const { token, instanceUrl } = await accessToken(cfg);
 

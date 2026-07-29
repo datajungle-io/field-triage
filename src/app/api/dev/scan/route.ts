@@ -54,13 +54,21 @@ export async function GET(request: NextRequest) {
     const { stdout } = await exec("sf", ["org", "display", "--target-org", org, "--json"], {
       // The CLI colours its output even when not attached to a TTY, and the
       // escape sequences land *inside* the JSON body.
-      env: { ...process.env, NO_COLOR: "1", FORCE_COLOR: "0" },
+      //
+      // FORCE_COLOR is deleted rather than set to "0": the CLI treats it as
+      // set-or-not, and *any* value makes it ignore NO_COLOR outright ("The
+      // 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set").
+      // Setting it to "0" was defeating the thing it was meant to reinforce.
+      env: { ...process.env, NO_COLOR: "1", FORCE_COLOR: undefined },
       maxBuffer: 10 * 1024 * 1024,
     });
 
-    // Belt and braces: strip any escape sequences that survived, then start at
-    // the first brace to skip the CLI's update-available banner.
-    const clean = stdout.replace(/\u001b\[[0-9;]*m/g, "");
+    // Belt and braces: strip escape sequences that survived, then start at the
+    // first brace to skip the CLI's update-available banner. Matches every CSI
+    // sequence, not just the colour ones — the spinner emits cursor moves and
+    // line clears (ESC[1A, ESC[2K), which a colour-only pattern leaves behind
+    // to break the parse.
+    const clean = stdout.replace(/\u001b\[[0-9;?]*[a-zA-Z]/g, "");
     const start = clean.indexOf("{");
     if (start < 0) throw new Error("no JSON in `sf org display` output");
     info = JSON.parse(clean.slice(start)).result;
