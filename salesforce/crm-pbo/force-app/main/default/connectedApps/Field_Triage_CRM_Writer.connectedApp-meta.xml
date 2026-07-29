@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ConnectedApp xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Field Triage CRM Writer</label>
+    <contactEmail>brendan@datajungle.io</contactEmail>
+    <description>Server-to-server writer for triage.datajungle.io. Upserts a Lead per scanned org using the JWT bearer flow. No interactive login.</description>
+    <oauthConfig>
+        <!-- Unused by the JWT bearer flow, which never redirects, but the
+             metadata type requires a callback URL. -->
+        <callbackUrl>http://localhost:1717/OauthRedirect</callbackUrl>
+        <certificate>MIIDVTCCAj2gAwIBAgIUGJZ4r0HXJzlbi0uvtE/82YphDs4wDQYJKoZIhvcNAQELBQAwOjEVMBMGA1UEAwwMZmllbGQtdHJpYWdlMRQwEgYDVQQKDAtEYXRhIEp1bmdsZTELMAkGA1UEBhMCQ0EwHhcNMjYwNzI5MTg0MTAwWhcNMzYwNzI2MTg0MTAwWjA6MRUwEwYDVQQDDAxmaWVsZC10cmlhZ2UxFDASBgNVBAoMC0RhdGEgSnVuZ2xlMQswCQYDVQQGEwJDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKpr6/6z0me8axQh9T5ActuAzAHUYvjDgDzEUEkSD/+EGCxHe7BJxx+eoz1JET5Tp271fJRYlnrqGuiSMpQkgz/TbP/eOU7Ha06IUaKjWlkX1X6tAU6QjqsErIOfO8SxrvV/cJFd67pNKKrXAVlgS3yOUuWzwoIrL/zYJ/NzfGvZ6fRitSlRP+wcINAT2kKBHGMyRF8n3Wp0rW9VhnVV9vziEUYrrYUgZFoPwiGBKtB+/s4rEbikDHJJlW9WwfLiUWXRfoxe3NwDBvDYZxSnDy0lAqSTZ1xALZOIZ811GbQRnUGB2/riBAOOFEcl+kTTYOHlaYCg7mpHp7ZbNJRWS9MCAwEAAaNTMFEwHQYDVR0OBBYEFK+WnIz9a2ACxgc443pznPCdYT9cMB8GA1UdIwQYMBaAFK+WnIz9a2ACxgc443pznPCdYT9cMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADf1AaW32524TBPG+EUxWJTdU+uj+14oDBJuRjj7bbNRiR/9OZxCF/rmaJNq2M6nAn4DdBIKBf0W5xbR2BirCUkf5Xo38lIRcYFd1DMgCky7eaOaJ1rAV+gC+RTSnpWZGL9sJVqIrOddbwadlEPnvQdkuNLBtic+qCano2QZZyPgTw8JiI6VF1UFD24joqRadaARuqxFFw+UWUBOAtanwXy4GDUQOsjH8oYUYdrXnOaDz0LJ3fsTih4v0jktcCojljBZTqbZpnDVenSO0ewsafQ3l64jO5Yqi+vRoqVW8zv5ip3Voir0qprtTGd/C0i8XhzSKbk68mML6+h2Z3Sl7gw=</certificate>
+        <!-- Pre-authorised, scoped to the permission set that already grants
+             FLS on Field_Triage_Org_Id__c. Without this the JWT exchange fails
+             with "user hasn't approved this consumer". -->
+        <isAdminApproved>true</isAdminApproved>
+        <scopes>Api</scopes>
+        <scopes>RefreshToken</scopes>
+    </oauthConfig>
+    <permissionSetName>Field_Triage_CRM_Writer</permissionSetName>
+</ConnectedApp>
