@@ -15,7 +15,13 @@ export const dynamic = "force-dynamic";
 const fmt = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : v.toLocaleString("en-US");
 
-export default async function FieldTriagePage({ params }: { params: { token: string } }) {
+export default async function FieldTriagePage({
+  params,
+  searchParams,
+}: {
+  params: { token: string };
+  searchParams: { returning?: string };
+}) {
   const scan = await scanByToken(params.token);
   if (!scan) notFound();
 
@@ -60,6 +66,25 @@ export default async function FieldTriagePage({ params }: { params: { token: str
         and start there — or open the full{" "}
         <Link href={`/r/${scan.token}/detail`}>triage detail</Link>.
       </p>
+
+      {searchParams.returning === "1" && (
+        <div className="coverage-banner" style={{ borderLeftColor: "#B5D333" }}>
+          <span aria-hidden="true">↩</span>
+          <div>
+            <strong>You&apos;ve scanned this org before.</strong>
+            This is your report from{" "}
+            {new Date(scan.created_at).toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+            })}
+            , so we didn&apos;t run a second scan or ask your org for anything new.{" "}
+            <a href="/api/auth/start?fresh=1" style={{ color: "#B5D333", fontWeight: 600 }}>
+              Run a fresh scan
+            </a>{" "}
+            if things have changed since.
+          </div>
+        </div>
+      )}
 
       <ScanStatusStrip token={scan.token} initialProgress={progress} />
 

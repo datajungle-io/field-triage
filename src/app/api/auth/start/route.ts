@@ -27,6 +27,10 @@ export async function GET(request: NextRequest) {
       ? requested
       : undefined;
 
+  // ?fresh=1 forces a new scan even when this org already has a live report —
+  // the "run it again" path from the returning-visitor banner.
+  const fresh = params.get("fresh") === "1";
+
   const state = randomBytes(24).toString("base64url");
   const pkce = createPkce();
 
@@ -34,7 +38,7 @@ export async function GET(request: NextRequest) {
     authorizeUrl({ state, challenge: pkce.challenge, isSandbox, prompt }),
   );
 
-  response.cookies.set("ft_oauth", JSON.stringify({ state, verifier: pkce.verifier, isSandbox }), {
+  response.cookies.set("ft_oauth", JSON.stringify({ state, verifier: pkce.verifier, isSandbox, fresh }), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

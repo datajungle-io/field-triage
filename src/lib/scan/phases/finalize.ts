@@ -1,5 +1,5 @@
 import { loginHostFor } from "@/lib/salesforce/oauth";
-import { notifyNewScan } from "@/lib/notify";
+import { notifyNewScan, sendReportToUser } from "@/lib/notify";
 import type { PhaseContext, PhaseResult } from "@/lib/scan/types";
 
 /**
@@ -59,10 +59,16 @@ export async function runFinalize(ctx: PhaseContext): Promise<PhaseResult> {
         : `Token ${revoked ? "revoked" : "cleared (revoke failed)"}.`),
   );
 
-  // Best-effort: a failed notification must not fail a finished scan.
-  await notifyNewScan(ctx.scanId).catch((err) =>
-    ctx.log(`Lead notification failed: ${String(err).slice(0, 160)}`),
-  );
+  // Both best-effort: a failed notification must not fail a finished scan.
+  await Promise.allSettled([
+    notifyNewScan(ctx.scanId).catch((err) =>
+      ctx.log(`Lead notification failed: ${String(err).slice(0, 160)}`),
+    ),
+    // Their only copy of the link. Without it, closing the tab loses the report.
+    sendReportToUser(ctx.scanId).catch((err) =>
+      ctx.log(`Report email failed: ${String(err).slice(0, 160)}`),
+    ),
+  ]);
 
   return { done: true, total: 1, scanned: 1, failed: 0 };
 }
