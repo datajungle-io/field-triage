@@ -15,6 +15,34 @@ export const dynamic = "force-dynamic";
 const fmt = (v: number | null | undefined) =>
   v === null || v === undefined ? "—" : v.toLocaleString("en-US");
 
+/**
+ * The audit's five dimensions, verbatim from the real scope framework in
+ * collateral/onboarding/dq-audit-scope.html — same names, same check ranges.
+ *
+ * Only Completeness is marked covered, and only partly: this scan measures
+ * whether a field holds a value at all. It says nothing about whether the value
+ * is valid, unique, fresh or consistent with anything else. Note in particular
+ * that "unchanged 90+ days" is field *metadata* age, not data timeliness — so
+ * Timeliness is genuinely untouched here despite sounding close.
+ */
+const DQ_DIMENSIONS: Array<{
+  name: string;
+  checks: string;
+  desc: string;
+  covered?: boolean;
+}> = [
+  {
+    name: "Completeness",
+    checks: "15–25",
+    desc: "Is the field filled in at all — what this scan measures.",
+    covered: true,
+  },
+  { name: "Validity", checks: "7–12", desc: "Formats, picklists, verified against a source of truth." },
+  { name: "Uniqueness", checks: "1–3", desc: "Keys and near-keys: external IDs, email, domain." },
+  { name: "Timeliness", checks: "3–6", desc: "Stale records, stage SLAs, expired quotes and contracts." },
+  { name: "Consistency", checks: "3–6", desc: "Stage ↔ close date, record type ↔ required fields." },
+];
+
 export default async function FieldTriagePage({
   params,
   searchParams,
@@ -53,11 +81,17 @@ export default async function FieldTriagePage({
   const notEnabled = OBJECTS.filter((name) => !scanned.has(name));
 
   return (
-    <Shell token={scan.token} active="field-triage">
+    <Shell
+      token={scan.token}
+      active="field-triage"
+      orgName={scan.org_name}
+      scannedAt={scan.created_at}
+      expiresAt={scan.expires_at}
+    >
       <ScanDriver token={scan.token} initialProgress={progress} />
 
       <div className="breadcrumb">
-        <Link href={`/r/${scan.token}`}>Home</Link> › Metadata › Field Triage
+        Metadata › Field Triage
       </div>
 
       <h1 className="page-title">Field Triage</h1>
@@ -262,22 +296,60 @@ export default async function FieldTriagePage({
         </p>
       )}
 
-      <div className="hero" style={{ marginTop: "2.5rem" }}>
-        <div className="hero-eyebrow">This is one page of Data Jungle</div>
-        <h2 className="hero-title">Want the other pages — and the deletions tracked?</h2>
-        <p className="hero-sub">
-          Profile Triage, Report Triage, dependency remediation, and a nightly re-scan so
-          Fields Deleted actually counts up. Data Jungle builds your revenue data platform —
-          done for you, and yours to keep.
-        </p>
-        <a
-          className="hero-cta"
-          href="https://calendly.com/brendan-mcdonald/30min"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Book a call →
-        </a>
+      {/*
+        Sells the actual next step in the funnel — a data quality audit — rather
+        than other dashboard pages.
+
+        The dimension panel is the argument made visible: the five dimensions are
+        the real audit framework (collateral/onboarding/dq-audit-scope.html), and
+        this scan touches exactly one of them, partially. Showing that is far
+        more persuasive than claiming the audit "goes deeper", and it stays
+        honest — a reader can check each row against what they just read.
+      */}
+      <div className="hero cta-split" style={{ marginTop: "2.5rem" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="hero-eyebrow">What this scan can&apos;t tell you</div>
+          <h2 className="hero-title">
+            Whether the fields you&apos;re keeping hold good data.
+          </h2>
+          <p className="hero-sub">
+            This scan covers one of five data quality dimensions, and only partly. The
+            other four need people who know how each object is actually used.
+          </p>
+          <p className="hero-sub" style={{ marginTop: "0.6rem" }}>
+            That&apos;s the audit: two weeks, a ranked list of what to fix, and what
+            it&apos;s costing you.
+          </p>
+          {/* Names the thing being booked. "Book a call" asks for time; "book a
+              free data quality audit" says what they get for it. */}
+          <a
+            className="hero-cta"
+            href="https://calendly.com/brendan-mcdonald/30min"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Book a free data quality audit →
+          </a>
+        </div>
+
+        <div className="dq-panel">
+          <div className="dq-panel-head">
+            <span>The five dimensions</span>
+            <span className="dq-panel-note">checks per object</span>
+          </div>
+          {DQ_DIMENSIONS.map((d) => (
+            <div key={d.name} className={`dq-row ${d.covered ? "dq-covered" : ""}`}>
+              <div className="dq-row-top">
+                <span className="dq-name">
+                  {d.name}
+                  {d.covered && <span className="dq-badge">partly covered</span>}
+                </span>
+                <span className="dq-count">{d.checks}</span>
+              </div>
+              <p className="dq-desc">{d.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </Shell>
   );

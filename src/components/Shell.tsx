@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 /**
- * The Data Jungle chrome — a hand-coded equivalent of Evidence's default layout and
- * Sidebar.svelte, which generates its tree from the pages/ directory.
+ * The Data Jungle chrome — a hand-coded equivalent of Evidence's default layout
+ * and Sidebar.svelte, which generates its tree from the pages/ directory.
  *
  * Profile Triage and Report Triage are rendered but locked. They exist in the
  * paid product and this report is deliberately one page of a larger instance:
@@ -13,34 +13,63 @@ import Link from "next/link";
 interface ShellProps {
   token: string;
   active?: "field-triage" | "detail";
+  /** Shown in the sidebar so the report says whose org it is. */
+  orgName?: string | null;
+  scannedAt?: string | null;
+  expiresAt?: string | null;
   children: React.ReactNode;
 }
 
-export function Shell({ token, active = "field-triage", children }: ShellProps) {
+export function Shell({
+  token,
+  active = "field-triage",
+  orgName,
+  scannedAt,
+  expiresAt,
+  children,
+}: ShellProps) {
+  const fmtDate = (iso?: string | null) =>
+    iso
+      ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+      : null;
+
   return (
     <div>
       <div className="app-topbar">
-        <a href="https://datajungle.io" target="_blank" rel="noreferrer" className="brand">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/dj-logo-dark.svg" alt="Data Jungle" height={22} />
-        </a>
-        <a
-          href="https://calendly.com/brendan-mcdonald/30min"
-          target="_blank"
-          rel="noreferrer"
-          className="topbar-cta"
-        >
-          Book a call
-        </a>
+        <div className="app-topbar-inner">
+          <a href="https://datajungle.io" target="_blank" rel="noreferrer" className="brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/dj-logo-dark.svg" alt="Data Jungle" height={26} />
+          </a>
+          <a
+            href="https://calendly.com/brendan-mcdonald/30min"
+            target="_blank"
+            rel="noreferrer"
+            className="topbar-cta"
+          >
+            Book a call
+          </a>
+        </div>
       </div>
 
       <div className="app-shell">
         <aside className="app-sidebar">
-          <div className="nav-group">
-            <Link className="nav-section" href={`/r/${token}`}>
-              Home
-            </Link>
-          </div>
+          {/*
+            No "Home" item: this report is a single page, so it linked to itself
+            and read as broken. The space is better spent saying whose org this
+            is and when it was scanned — context that otherwise appears nowhere.
+          */}
+          {orgName && (
+            <div className="sidebar-org">
+              <div className="sidebar-org-name">{orgName}</div>
+              {scannedAt && (
+                <div className="sidebar-org-meta">Scanned {fmtDate(scannedAt)}</div>
+              )}
+              {expiresAt && (
+                <div className="sidebar-org-meta">Expires {fmtDate(expiresAt)}</div>
+              )}
+            </div>
+          )}
 
           <div className="nav-group">
             <span className="nav-section">Metadata</span>
@@ -58,12 +87,13 @@ export function Shell({ token, active = "field-triage", children }: ShellProps) 
                 Triage Detail
               </Link>
             </div>
-            <span className="nav-leaf locked" title="Available in the full product">
-              Profile Triage <LockIcon />
-            </span>
-            <span className="nav-leaf locked" title="Available in the full product">
-              Report Triage <LockIcon />
-            </span>
+            {/*
+              No locked Profile/Report Triage teasers. They advertised other
+              dashboard pages, but the actual next step is a data quality audit —
+              weeks of work and conversations with subject-matter experts, not
+              another screen. Teasing the wrong thing costs credibility twice:
+              the scan can't produce those pages, and they aren't what's for sale.
+            */}
           </div>
         </aside>
 
@@ -73,11 +103,3 @@ export function Shell({ token, active = "field-triage", children }: ShellProps) 
   );
 }
 
-function LockIcon() {
-  return (
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-      <rect x="4" y="11" width="16" height="10" rx="2" />
-      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-    </svg>
-  );
-}

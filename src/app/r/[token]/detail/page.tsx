@@ -110,12 +110,17 @@ export default async function DetailPage({
   };
 
   return (
-    <Shell token={scan.token} active="detail">
+    <Shell
+      token={scan.token}
+      active="detail"
+      orgName={scan.org_name}
+      scannedAt={scan.created_at}
+      expiresAt={scan.expires_at}
+    >
       <ScanDriver token={scan.token} initialProgress={progress} />
 
       <div className="breadcrumb">
-        <Link href={`/r/${scan.token}`}>Home</Link> › Metadata ›{" "}
-        <Link href={`/r/${scan.token}`}>Field Triage</Link> › Triage Detail
+        Metadata › <Link href={`/r/${scan.token}`}>Field Triage</Link> › Triage Detail
       </div>
 
       <h1 className="page-title">Triage Detail</h1>

@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   description:
     "Free Salesforce field audit. Connect your org and see which custom fields are dead, which are safe to delete, and which have zero dependencies blocking removal.",
   robots: { index: true, follow: true },
+  // Matches datajungle.io. src/app/icon.svg is picked up automatically by the
+  // App Router; these are declared as well so the apple-touch icon and any
+  // crawler that ignores the convention still resolve.
+  icons: {
+    icon: [{ url: "/dj-logomark.svg", type: "image/svg+xml" }],
+    apple: "/dj-logomark.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

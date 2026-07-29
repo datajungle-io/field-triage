@@ -12,25 +12,23 @@
  * enough to eyeball.
  * ------------------------------------------------------------------------- */
 
+/*
+ * Dark only. Light mode was half-supported and that showed — the wordmark
+ * swapped to its light colourway on a dark surface, and every new rule needed a
+ * second variant nobody was checking. color-scheme tells the browser to render
+ * form controls and scrollbars dark too.
+ */
 :root {
-  --base-100: 0 0% 100%;
-  --base-200: 0 0% 96.9%;
-  --base-300: 0 0% 83.9%;
-  --base-content: 0 0% 17.3%;
-  --base-heading: 0 0% 2.4%;
+  color-scheme: dark;
+
+  --base-100: 214.3 28% 9.8%;
+  --base-200: 216 24.6% 12%;
+  --base-300: 217.5 14.3% 22%;
+  --base-content: 240 1.9% 79.6%;
+  --base-heading: 240 16.7% 97.6%;
 
   --font-sans: "Mozilla Text", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --base-100: 214.3 28% 9.8%;
-    --base-200: 216 24.6% 12%;
-    --base-300: 217.5 14.3% 22%;
-    --base-content: 240 1.9% 79.6%;
-    --base-heading: 240 16.7% 97.6%;
-  }
 }
 
 html {
@@ -416,9 +414,32 @@ body {
  * rail, uppercase section headers, muted leaves, lime active state.
  * ------------------------------------------------------------------------- */
 
+/*
+ * Content is capped and centred rather than running to the window edges. At
+ * full-bleed the wordmark, the CTA and the sidebar all sat pinned to the
+ * extremes with the table stretched between them, which reads as unfinished
+ * rather than spacious.
+ */
+:root {
+  --app-max: 1440px;
+}
+
 .app-shell {
   display: flex;
   min-height: 100vh;
+  max-width: var(--app-max);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.app-topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: var(--app-max);
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
 .app-topbar {
@@ -430,9 +451,9 @@ body {
   justify-content: space-between;
   /* Taller now that the CTA is a real button rather than a small pill. */
   height: 60px;
-  /* Right padding matches .app-main so the CTA lines up with the right edge of
-     the KPI tiles and the table, rather than floating past them. */
-  padding: 0 2rem 0 1.25rem;
+  /* Contents are centred by .app-topbar-inner; the bar itself spans the
+     viewport so its bottom border does too. */
+  padding: 0;
   border-bottom: 1px solid hsl(var(--base-300));
   background-color: hsl(var(--base-100));
   font-weight: 700;
@@ -477,12 +498,6 @@ body {
   display: block;
 }
 
-@media (prefers-color-scheme: light) {
-  .brand img {
-    content: url("/dj-logo-light.svg");
-  }
-}
-
 .topbar-cta {
   /* Sized to hold its own against the wordmark — at 0.78rem it read as a
      secondary link rather than the page's one standing call to action. */
@@ -513,8 +528,29 @@ body {
 .app-sidebar {
   width: 12rem;
   flex: none;
-  padding: 1.75rem 0 2rem 1.25rem;
+  padding: 1.75rem 0 2rem;
   font-size: 0.875rem;
+}
+
+/* Whose org this is, and when — the report never said either. */
+.sidebar-org {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid hsl(var(--base-300) / 0.6);
+}
+
+.sidebar-org-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: hsl(var(--base-heading));
+  line-height: 1.3;
+  margin-bottom: 0.3rem;
+}
+
+.sidebar-org-meta {
+  font-size: 0.72rem;
+  color: hsl(var(--base-content) / 0.45);
+  line-height: 1.5;
 }
 
 .app-sidebar .nav-section {
@@ -549,14 +585,6 @@ body {
   font-weight: 600;
 }
 
-.app-sidebar .nav-leaf.locked {
-  color: hsl(var(--base-content) / 0.32);
-  cursor: default;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
 .app-sidebar .nav-sub {
   padding-left: 0.75rem;
   border-left: 1px solid hsl(var(--base-300));
@@ -566,7 +594,7 @@ body {
 .app-main {
   flex: 1 1 auto;
   min-width: 0;
-  padding: 1.75rem 2rem 4rem;
+  padding: 1.75rem 0 4rem 2rem;
   /* No max-width: this is a dashboard, and capping the content while the topbar
      spans the viewport left the CTA stranded away from the tiles it sits above. */
 }
@@ -1167,37 +1195,10 @@ body {
 }
 .ref-Flow,
 .ref-ValidationRule {
-  background-color: rgba(10, 77, 58, 0.12);
-  color: #0a4d3a;
+  background-color: rgba(75, 192, 118, 0.16);
+  color: #4bc076;
 }
 
-/* The production dashboard is authored light-first, and three of these badge
-   colours are dark inks that vanish against a dark surface — #0A4D3A on
-   near-black is effectively unreadable. Lift them for dark mode rather than
-   changing the light palette, so both match the original where it works. */
-@media (prefers-color-scheme: dark) {
-  .ref-Flow,
-  .ref-ValidationRule {
-    background-color: rgba(75, 192, 118, 0.16);
-    color: #4bc076;
-  }
-  .ref-Report {
-    background-color: rgba(181, 211, 51, 0.18);
-    color: #b5d333;
-  }
-  .ref-ReportType {
-    background-color: rgba(245, 183, 49, 0.18);
-    color: #f5b731;
-  }
-  .ref-Layout {
-    background-color: rgba(137, 207, 240, 0.18);
-    color: #89cff0;
-  }
-  .ref-FlexipageFieldInstance {
-    background-color: rgba(160, 148, 237, 0.18);
-    color: #a094ed;
-  }
-}
 
 .empty-state {
   font-size: 0.85rem;
@@ -1308,4 +1309,125 @@ body {
 .hero-cta:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------------------
+ * Closing CTA — text left, data-quality dimensions right.
+ *
+ * The panel exists because the section was full-width with text wrapping at a
+ * readable measure, leaving half the block empty. Filling it with the actual
+ * audit framework does double duty: it removes the dead space and it makes the
+ * argument checkable — five dimensions, one of them partly covered by what the
+ * reader just looked at.
+ * ------------------------------------------------------------------------- */
+
+.cta-split {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (min-width: 1100px) {
+  .cta-split {
+    flex-direction: row;
+    gap: 3rem;
+    align-items: flex-start;
+  }
+}
+
+.dq-panel {
+  width: 100%;
+  flex: none;
+  border-radius: 10px;
+  border: 1px solid hsl(var(--base-300));
+  background: hsl(var(--base-200) / 0.35);
+  padding: 1.1rem 1.25rem;
+}
+
+@media (min-width: 1100px) {
+  .dq-panel {
+    width: 400px;
+  }
+}
+
+.dq-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: hsl(var(--base-content) / 0.5);
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid hsl(var(--base-300) / 0.7);
+}
+
+.dq-panel-note {
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  font-size: 0.68rem;
+  color: hsl(var(--base-content) / 0.35);
+}
+
+.dq-row {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid hsl(var(--base-300) / 0.4);
+}
+
+.dq-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.dq-row-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dq-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: hsl(var(--base-content) / 0.55);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* The one dimension this scan touches is lifted; the other four sit muted, so
+   the gap is legible at a glance rather than needing to be read. */
+.dq-covered .dq-name {
+  color: hsl(var(--base-heading));
+}
+
+.dq-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #b5d333;
+  background: rgba(181, 211, 51, 0.13);
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+
+.dq-count {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--base-content) / 0.4);
+  flex: none;
+}
+
+.dq-covered .dq-count {
+  color: hsl(var(--base-content) / 0.6);
+}
+
+.dq-desc {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: hsl(var(--base-content) / 0.45);
+  margin: 0.3rem 0 0;
 }

@@ -77,10 +77,15 @@ export default async function FieldDrillPage({
   const reportGap = progress.phases.find((p) => p.phase === "reports" && p.failed > 0);
 
   return (
-    <Shell token={scan.token} active="detail">
+    <Shell
+      token={scan.token}
+      active="detail"
+      orgName={scan.org_name}
+      scannedAt={scan.created_at}
+      expiresAt={scan.expires_at}
+    >
       <div className="breadcrumb">
-        <Link href={`/r/${scan.token}`}>Home</Link> › Metadata ›{" "}
-        <Link href={`/r/${scan.token}`}>Field Triage</Link> ›{" "}
+        Metadata › <Link href={`/r/${scan.token}`}>Field Triage</Link> ›{" "}
         <Link href={`/r/${scan.token}/detail`}>Triage Detail</Link> › Where Is This Used
       </div>
 

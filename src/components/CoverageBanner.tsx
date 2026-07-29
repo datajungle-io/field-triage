@@ -111,9 +111,14 @@ export function CoverageBanner({
           {gaps.map((gap) => (
             <li key={gap.phase}>
               <strong>{SOURCE_LABELS[gap.phase]}</strong>
+              {/* Only quote a ratio when it can actually be true. A phase whose
+                  total is missing or smaller than its failure count would
+                  otherwise print "1 of 0 could not be read". */}
               {gap.status === "failed" || gap.status === "skipped"
                 ? " — not scanned."
-                : ` — ${gap.failed.toLocaleString("en-US")} of ${gap.total.toLocaleString("en-US")} could not be read.`}{" "}
+                : gap.total >= gap.failed && gap.total > 0
+                  ? ` — ${gap.failed.toLocaleString("en-US")} of ${gap.total.toLocaleString("en-US")} could not be read.`
+                  : " — some could not be read."}{" "}
               {HINTS[gap.phase] ?? ""}
             </li>
           ))}
