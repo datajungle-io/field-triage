@@ -561,12 +561,12 @@ body {
   margin-bottom: 0.25rem;
 }
 
-/* Greyed to match the label. At full saturation the blue was the loudest thing
-   in the sidebar, on the least important line in it. */
+/* Full-colour. The earlier greyed version was solving a problem the layout
+   already fixed: the blue only competed when it sat inline with the bold org
+   name. On its own muted line, the label text carries the meaning and the
+   colour just makes the mark recognisable at 14px. */
 .sidebar-org-source img {
   flex: none;
-  filter: grayscale(1);
-  opacity: 0.55;
 }
 
 .sidebar-org-meta {
