@@ -545,19 +545,28 @@ body {
   color: hsl(var(--base-heading));
   line-height: 1.3;
   margin-bottom: 0.3rem;
-  /* Flex so the mark hangs beside a wrapping org name rather than sitting on
-     the baseline of its last line. */
-  display: flex;
-  align-items: flex-start;
-  gap: 0.4rem;
 }
 
-/* Nudged down to sit on the cap height of the first line, and held at its
-   natural size so a long org name can't squeeze it. */
-.sidebar-org-mark {
+/* Provenance line above the org name. Deliberately quiet — same weight and
+   colour as the "Scanned"/"Expires" meta below it, so it reads as one more
+   fact about the scan rather than branding. */
+.sidebar-org-source {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: hsl(var(--base-content) / 0.45);
+  margin-bottom: 0.25rem;
+}
+
+/* Greyed to match the label. At full saturation the blue was the loudest thing
+   in the sidebar, on the least important line in it. */
+.sidebar-org-source img {
   flex: none;
-  margin-top: 2px;
-  opacity: 0.9;
+  filter: grayscale(1);
+  opacity: 0.55;
 }
 
 .sidebar-org-meta {

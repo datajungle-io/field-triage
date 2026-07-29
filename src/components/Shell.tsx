@@ -62,24 +62,20 @@ export function Shell({
           {orgName && (
             <div className="sidebar-org">
               {/*
-                The Salesforce mark sits here, beside the org name, and nowhere
-                else in the chrome. Next to the org it reads as a source label —
-                "this data came from Salesforce" — which is true and useful. Up
-                in the topbar beside our own wordmark it would read as a badge,
-                implying a partnership or endorsement that doesn't exist.
+                A source label, not a badge. Set beside the org *name* the
+                full-colour mark read as that company's own logo — worse than
+                decorative, actively misleading. On its own muted line above the
+                name, with the word "Salesforce org" carrying the meaning, it
+                says where the data came from and nothing more. Desaturated so
+                it sits in a monochrome column without competing with the one
+                accent colour the page has.
               */}
-              <div className="sidebar-org-name">
+              <div className="sidebar-org-source">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/salesforce.svg"
-                  alt=""
-                  aria-hidden="true"
-                  width={20}
-                  height={14}
-                  className="sidebar-org-mark"
-                />
-                {orgName}
+                <img src="/salesforce.svg" alt="" aria-hidden="true" width={14} height={10} />
+                Salesforce org
               </div>
+              <div className="sidebar-org-name">{orgName}</div>
               {scannedAt && (
                 <div className="sidebar-org-meta">Scanned {fmtDate(scannedAt)}</div>
               )}
