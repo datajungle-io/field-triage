@@ -54,15 +54,26 @@ function esc(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/**
+ * One of the three headline tiles.
+ *
+ * Equal widths come from table-layout:fixed on the row — without it the cells
+ * size to their content and a four-digit figure makes its tile visibly wider
+ * than the others. Equal heights come from a fixed height on the inner cell
+ * rather than height:100%, which Outlook ignores; the labels wrap to two lines
+ * at some values and one at others, so letting height follow content
+ * guarantees a ragged row.
+ */
 function statCell(value: string, label: string, colour: string, sub: string): string {
   return `
-    <td width="33%" style="padding:0 6px;vertical-align:top;">
+    <td width="33.33%" style="width:33.33%;padding:0 5px;vertical-align:top;">
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
-             style="background-color:${CARD};border:1px solid ${LINE};border-radius:10px;">
-        <tr><td style="padding:18px 16px;text-align:center;font-family:${FONT};">
-          <div style="font-size:30px;line-height:1.1;font-weight:700;color:${colour};">${value}</div>
-          <div style="font-size:12px;line-height:1.4;color:${TEXT};font-weight:600;padding-top:6px;">${label}</div>
-          <div style="font-size:11px;line-height:1.4;color:${MUTED};padding-top:3px;">${sub}</div>
+             style="width:100%;background-color:${CARD};border:1px solid ${LINE};border-radius:10px;">
+        <tr><td height="112" style="height:112px;padding:12px 8px;text-align:center;
+                   vertical-align:middle;font-family:${FONT};">
+          <div style="font-size:28px;line-height:1.1;font-weight:700;color:${colour};">${value}</div>
+          <div style="font-size:12px;line-height:1.35;color:${TEXT};font-weight:600;padding-top:6px;">${label}</div>
+          <div style="font-size:11px;line-height:1.35;color:${MUTED};padding-top:3px;">${sub}</div>
         </td></tr>
       </table>
     </td>`;
@@ -86,8 +97,11 @@ export function reportEmailHtml(d: ReportEmailData): string {
 
   const nextStep =
     d.readyNoDeps && d.readyNoDeps > 0
-      ? `<strong style="color:${TEXT};">Start with the ${fmt(d.readyNoDeps)} that have zero references.</strong>
-         Nothing points at them — no Apex, no flow, no layout, no report — so there is nothing to untangle first.`
+      ? `<strong style="color:${TEXT};">Start with the ${fmt(d.readyNoDeps)} that ${
+          d.readyNoDeps === 1 ? "has" : "have"
+        } zero references.</strong>
+         Nothing points at ${d.readyNoDeps === 1 ? "it" : "them"} — no Apex, no flow, no layout, no
+         report — so there is nothing to untangle first.`
       : `Every candidate still has something pointing at it — a report, a layout, a flow. The report names
          each reference, so you can see exactly what has to be cleared before a field can go.`;
 
@@ -113,12 +127,29 @@ export function reportEmailHtml(d: ReportEmailData): string {
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560"
                style="width:560px;max-width:100%;">
 
+          <!-- Wordmark as live text, not an image.
+               Gmail re-maps a dark email to light on its own. Text colours get
+               inverted along with everything else, but images do not — so a
+               white-on-transparent wordmark PNG became white-on-white the
+               moment Gmail decided this email should be light. The only mark
+               that ships as an image is the palm tile, which is a green glyph
+               on a pale lime square and therefore legible against either. -->
           <tr>
             <td style="padding:0 6px 26px;">
               <a href="https://datajungle.io" style="text-decoration:none;">
-                <img src="https://triage.datajungle.io/dj-logo-email.png"
-                     alt="Data Jungle" width="220" height="46"
-                     style="display:block;border:0;outline:none;width:220px;height:auto;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding-right:10px;vertical-align:middle;">
+                      <img src="https://triage.datajungle.io/dj-logomark-email.png"
+                           alt="" width="36" height="36"
+                           style="display:block;border:0;outline:none;border-radius:7px;">
+                    </td>
+                    <td style="vertical-align:middle;">
+                      <span style="font-family:${FONT};font-size:23px;font-weight:700;
+                                   letter-spacing:-0.01em;color:${TEXT};">Data&nbsp;Jungle</span>
+                    </td>
+                  </tr>
+                </table>
               </a>
             </td>
           </tr>
@@ -141,8 +172,9 @@ export function reportEmailHtml(d: ReportEmailData): string {
           </tr>
 
           <tr>
-            <td style="padding:0 0 24px;">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+            <td style="padding:0 1px 24px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                     style="width:100%;table-layout:fixed;">
                 <tr>
                   ${statCell(fmt(d.fieldsScanned), "Fields scanned", TEXT, "4 core objects")}
                   ${statCell(fmt(d.deleteReady), "Candidates", RED, "&lt;1% populated")}
@@ -242,8 +274,8 @@ export function reportEmailText(d: ReportEmailData): string {
       ? "1 is a deletion candidate — under 1% populated and untouched for 90+ days."
       : `${fmt(d.deleteReady)} are deletion candidates — under 1% populated and untouched for 90+ days.`,
     d.readyNoDeps && d.readyNoDeps > 0
-      ? `${fmt(d.readyNoDeps)} of those have zero references anywhere in Salesforce. Start there — ` +
-        "nothing has to be untangled first."
+      ? `${fmt(d.readyNoDeps)} of those ${d.readyNoDeps === 1 ? "has" : "have"} zero references ` +
+        "anywhere in Salesforce. Start there — nothing has to be untangled first."
       : "Each one still has something referencing it. The report names every reference.",
     "",
     "Want the rest of the picture? Field Triage looks at four objects and one question.",

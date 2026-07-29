@@ -1469,3 +1469,72 @@ body {
   color: hsl(var(--base-content) / 0.45);
   margin: 0.3rem 0 0;
 }
+
+/* ---------------------------------------------------------------------------
+ * Report chrome on small screens.
+ *
+ * The shell is a fixed 12rem sidebar beside a fluid main column, which on a
+ * phone left the sidebar eating half the viewport and squeezing the report into
+ * a ~180px gutter — every heading broken mid-word, the intro running to twelve
+ * lines. Last in the file so these win without needing !important.
+ *
+ * The nav tree is dropped rather than stacked. It holds two links, and both are
+ * already reachable from the page body: Field Triage links to the detail view in
+ * its intro and from every tile, and the detail view opens with "← Back to Field
+ * Triage". Repeating them costs a screenful of scrolling before the reader sees
+ * a single number. The org block stays — whose org this is and when it was
+ * scanned is context nothing else on the page provides.
+ * ------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .app-shell {
+    flex-direction: column;
+    padding: 0 1rem;
+  }
+
+  .app-sidebar {
+    width: auto;
+    flex: none;
+    padding: 1.25rem 0 0;
+  }
+
+  .app-sidebar .nav-group {
+    display: none;
+  }
+
+  .sidebar-org {
+    margin-bottom: 0;
+    padding-bottom: 1rem;
+  }
+
+  .app-main {
+    /* The 2rem left padding was the gutter between the columns; stacked, it is
+       just a dent in the left edge. */
+    padding: 1.25rem 0 3rem;
+  }
+
+  .app-topbar-inner {
+    padding: 0 1rem;
+  }
+
+  .page-title {
+    font-size: 1.6rem;
+  }
+
+  /* Side-by-side hero and panel stack; without this the CTA column collapses to
+     a few characters wide. */
+  .hero.cta-split {
+    flex-direction: column;
+  }
+}
+
+/* One tile per row on a phone. Two columns still fits at tablet widths, but at
+   390px a two-up grid clips "Candidates · No Dependencies" onto four lines. */
+@media (max-width: 560px) {
+  .kpi-tiles {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-tile {
+    padding: 1rem 1.15rem;
+  }
+}
