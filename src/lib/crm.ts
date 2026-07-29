@@ -284,7 +284,20 @@ export async function pushLeadToCrm(scanId: string, opts: { strict?: boolean } =
     `${instanceUrl}/services/data/${API_VERSION}/sobjects/Lead/${ORG_ID_FIELD}/${encodeURIComponent(orgId)}`,
     {
       method: "PATCH",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        // The org runs a Lead_Matching duplicate rule that fires on email. It
+        // reports allowSave: true — an alert for humans in the UI, not a hard
+        // block — but the REST API opts out by default and returns 400 instead
+        // of saving. Without this header the very first scan by anyone already
+        // in the CRM fails outright.
+        //
+        // Deliberate: a scan from someone who already exists should still
+        // produce its own Lead. That second record is the point — it marks a
+        // new touchpoint rather than silently folding into an old one.
+        "Sforce-Duplicate-Rule-Header": "allowSave=true",
+      },
       body: JSON.stringify(record),
       signal: AbortSignal.timeout(15_000),
     },
