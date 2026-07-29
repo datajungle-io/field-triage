@@ -1,4 +1,7 @@
 import { serviceClient } from "@/lib/supabase";
+import { reportEmailHtml, reportEmailText, type ReportEmailData } from "@/lib/email/reportTemplate";
+
+const BOOK_A_CALL = "https://calendly.com/brendan-mcdonald/30min";
 
 /**
  * Origin used in outbound email — always the public site.
@@ -122,30 +125,25 @@ export async function sendReportToUser(
     day: "numeric",
     year: "numeric",
   });
-  const firstName = (lead.name ?? "").split(" ")[0];
+  const firstName = (lead.name ?? "").split(" ")[0] || null;
 
-  const text = [
-    firstName ? `${firstName},` : "Hi,",
-    "",
-    `Your Field Triage report for ${scan.org_name ?? "your org"} is ready:`,
-    url,
-    "",
-    `We scanned ${fmt(lead.fields_scanned)} fields across Lead, Account, Contact and Opportunity.`,
-    lead.delete_ready === 1
-      ? "1 is delete-ready — under 1% populated and untouched for 90+ days."
-      : `${fmt(lead.delete_ready)} are delete-ready — under 1% populated and untouched for 90+ days.`,
-    lead.ready_no_deps === 1
-      ? "1 of those has zero references anywhere in Salesforce, so it can go as-is."
-      : `${fmt(lead.ready_no_deps)} of those have zero references anywhere in Salesforce, so they can go as-is.`,
-    "",
-    "Start with the zero-dependency ones — nothing has to be untangled first.",
-    "",
-    `This link works until ${expires}. Nothing was written to your org, and the`,
-    "access you granted was revoked as soon as the scan finished.",
-    "",
-    "— Data Jungle",
-    "https://datajungle.io",
-  ].join("\n");
+  const data: ReportEmailData = {
+    firstName,
+    orgName: scan.org_name ?? "your org",
+    reportUrl: url,
+    fieldsScanned: lead.fields_scanned,
+    deleteReady: lead.delete_ready,
+    readyNoDeps: lead.ready_no_deps,
+    expires,
+    bookACallUrl: BOOK_A_CALL,
+  };
+
+  // A subject promising deletions when the scan found none would be a lie the
+  // recipient catches on the first line.
+  const subject =
+    lead.delete_ready && lead.delete_ready > 0
+      ? `Your Field Triage report — ${fmt(lead.delete_ready)} fields worth a look`
+      : `Your Field Triage report for ${scan.org_name ?? "your org"}`;
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -153,8 +151,11 @@ export async function sendReportToUser(
     body: JSON.stringify({
       from,
       to: recipient,
-      subject: `Your Field Triage report — ${fmt(lead.delete_ready)} fields you can delete`,
-      text,
+      subject,
+      // Both parts sent: some clients prefer text, and a multipart message with
+      // no text alternative scores worse with spam filters.
+      html: reportEmailHtml(data),
+      text: reportEmailText(data),
     }),
     signal: AbortSignal.timeout(15_000),
   });

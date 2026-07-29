@@ -1,5 +1,6 @@
 import { loginHostFor } from "@/lib/salesforce/oauth";
 import { notifyNewScan, sendReportToUser } from "@/lib/notify";
+import { pushLeadToCrm } from "@/lib/crm";
 import type { PhaseContext, PhaseResult } from "@/lib/scan/types";
 
 /**
@@ -68,6 +69,18 @@ export async function runFinalize(ctx: PhaseContext): Promise<PhaseResult> {
     sendReportToUser(ctx.scanId).catch((err) =>
       ctx.log(`Report email failed: ${String(err).slice(0, 160)}`),
     ),
+    // Upserts on the org ID, so a repeat scan refreshes one Lead rather than
+    // stacking duplicates. Logged either way — a silent CRM is indistinguishable
+    // from one that has quietly stopped working.
+    pushLeadToCrm(ctx.scanId)
+      .then((result) =>
+        ctx.log(
+          result.pushed
+            ? `CRM: Lead ${result.created ? "created" : "updated"}${result.leadId ? ` (${result.leadId})` : ""}.`
+            : `CRM: skipped — ${result.reason}.`,
+        ),
+      )
+      .catch((err) => ctx.log(`CRM push failed: ${String(err).slice(0, 160)}`)),
   ]);
 
   return { done: true, total: 1, scanned: 1, failed: 0 };
