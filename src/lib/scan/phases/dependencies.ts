@@ -51,7 +51,24 @@ interface TrackedField {
 export async function runDependencies(ctx: PhaseContext): Promise<PhaseResult> {
   const fields = await loadTrackedFields(ctx);
   if (fields.length === 0) {
-    ctx.log("No custom fields with Ids — nothing to attribute dependencies to");
+    // Distinguish "this org has no custom fields" from "we couldn't get their
+    // Ids". The second case is a coverage failure: MetadataComponentDependency
+    // is matched by field Id, so with no Ids we attribute nothing and every
+    // field reads as having no layout/Apex/Flow/validation-rule references.
+    // Reporting success there is the most dangerous thing this phase can do —
+    // it makes an unscanned org look like a clean one.
+    const customFields = await countCustomFields(ctx);
+    if (customFields > 0) {
+      ctx.log(
+        `${customFields} custom fields but no field Ids — cannot attribute dependencies`,
+      );
+      throw new Error(
+        `Could not resolve Salesforce field Ids for ${customFields} custom fields, so ` +
+          "layout, Apex, Flow and validation-rule references could not be traced. This " +
+          "usually means the connecting user lacks permission to read field metadata.",
+      );
+    }
+    ctx.log("This org has no custom fields on the tracked objects");
     return { done: true, total: 0, scanned: 0, failed: 0 };
   }
 
@@ -175,6 +192,17 @@ async function insertReferences(
     if (error) throw new Error(`scan_field_refs insert failed: ${error.message}`);
   }
   return records.length;
+}
+
+/** Custom fields on tracked objects, regardless of whether we resolved an Id. */
+async function countCustomFields(ctx: PhaseContext): Promise<number> {
+  const { count, error } = await ctx.db
+    .from("scan_fields")
+    .select("*", { count: "exact", head: true })
+    .eq("scan_id", ctx.scanId)
+    .eq("is_custom", true);
+  if (error) return 0;
+  return count ?? 0;
 }
 
 async function loadTrackedFields(ctx: PhaseContext): Promise<TrackedField[]> {

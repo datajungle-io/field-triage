@@ -32,7 +32,16 @@ interface FieldDefinitionRow {
   DataType: string | null;
   NamespacePrefix: string | null;
   LastModifiedDate: string | null;
+  /**
+   * "<Object>.<fieldId>" for custom fields, "<Object>.<ApiName>" for standard.
+   * The custom-field form embeds the 15-char CustomField Id, which is the
+   * fallback when Tooling CustomField isn't readable — see loadCustomFieldIds.
+   */
+  DurableId: string | null;
 }
+
+/** A 15- or 18-char Salesforce field Id, as it appears inside DurableId. */
+const FIELD_ID_RE = /^00N[A-Za-z0-9]{12,15}$/;
 
 export async function runFieldDefinitions(ctx: PhaseContext): Promise<PhaseResult> {
   const startIndex = Number(ctx.cursor.objectIndex ?? 0);
@@ -50,7 +59,7 @@ export async function runFieldDefinitions(ctx: PhaseContext): Promise<PhaseResul
     const object = OBJECTS[index];
     try {
       const rows = await ctx.sf.query<FieldDefinitionRow>(
-        "SELECT QualifiedApiName, MasterLabel, DataType, NamespacePrefix, LastModifiedDate " +
+        "SELECT QualifiedApiName, MasterLabel, DataType, NamespacePrefix, LastModifiedDate, DurableId " +
           `FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName = '${object}'`,
         { tooling: true },
       );
@@ -65,9 +74,17 @@ export async function runFieldDefinitions(ctx: PhaseContext): Promise<PhaseResul
           field_api_name: fieldApiName,
           // Standard fields have no CustomField record, but Object Manager URLs
           // accept the API name in the same position, so the deep link still works.
+          //
+          // For custom fields, prefer the 18-char Id from Tooling CustomField;
+          // fall back to the 15-char Id embedded in FieldDefinition.DurableId.
+          // The fallback is what keeps dependency attribution working in orgs
+          // where the connecting user can't read CustomField — common, since it
+          // needs Customize Application. MetadataComponentDependency matching
+          // already tries both widths.
           field_id: isCustom
             ? (idMap.get(`${object}:${fieldApiName}`) ??
               idMap.get(`${ENTITY_ALIASES[object] ?? object}:${fieldApiName}`) ??
+              fieldIdFromDurableId(r.DurableId) ??
               null)
             : fieldApiName,
           field_label: r.MasterLabel,
@@ -103,6 +120,17 @@ export async function runFieldDefinitions(ctx: PhaseContext): Promise<PhaseResul
     scanned: index - failed,
     failed,
   };
+}
+
+/**
+ * Extract the field Id from FieldDefinition.DurableId.
+ *
+ * Custom fields: "Account.00NRd000004LkyP" -> "00NRd000004LkyP"
+ * Standard:      "Account.Sic"             -> null (not an Id)
+ */
+function fieldIdFromDurableId(durableId: string | null): string | null {
+  const tail = durableId?.split(".").pop();
+  return tail && FIELD_ID_RE.test(tail) ? tail : null;
 }
 
 /**
