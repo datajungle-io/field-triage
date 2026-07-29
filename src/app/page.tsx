@@ -19,9 +19,20 @@ export default function HomePage({
   const error = searchParams.error ? (ERRORS[searchParams.error] ?? ERRORS.server) : null;
 
   return (
-    <div>
+    <div className="landing">
       <div className="app-topbar">
-        <span>datajungle.io</span>
+        <a href="https://datajungle.io" target="_blank" rel="noreferrer" className="brand">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/dj-logo-dark.svg" alt="Data Jungle" height={22} />
+        </a>
+        <a
+          href="https://calendly.com/brendan-mcdonald/30min"
+          target="_blank"
+          rel="noreferrer"
+          className="topbar-cta"
+        >
+          Book a call
+        </a>
       </div>
 
       <main
@@ -31,6 +42,8 @@ export default function HomePage({
           padding: "3.5rem 1.5rem 5rem",
         }}
       >
+        {/* No Salesforce mark here — it sits on the Connect button, where it's
+            doing work. A second one this close reads as clutter. */}
         <div className="hero-eyebrow">Free Salesforce audit</div>
         <h1 className="hero-title" style={{ fontSize: "2.6rem" }}>
           Find the custom fields you can delete today.

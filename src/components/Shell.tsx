@@ -20,20 +20,15 @@ export function Shell({ token, active = "field-triage", children }: ShellProps) 
   return (
     <div>
       <div className="app-topbar">
-        <span>datajungle.io</span>
+        <a href="https://datajungle.io" target="_blank" rel="noreferrer" className="brand">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/dj-logo-dark.svg" alt="Data Jungle" height={22} />
+        </a>
         <a
           href="https://calendly.com/brendan-mcdonald/30min"
           target="_blank"
           rel="noreferrer"
-          style={{
-            fontSize: "0.78rem",
-            fontWeight: 600,
-            color: "#0a2a1f",
-            background: "#B5D333",
-            padding: "0.35rem 0.75rem",
-            borderRadius: 6,
-            textDecoration: "none",
-          }}
+          className="topbar-cta"
         >
           Book a call
         </a>

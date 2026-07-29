@@ -18,13 +18,25 @@ export function ConnectPanel() {
     <div className="hero" style={{ marginTop: "2rem" }}>
       <button
         className="hero-cta"
-        style={{ marginTop: 0, fontSize: "0.95rem", padding: "0.8rem 1.4rem" }}
+        style={{
+          marginTop: 0,
+          fontSize: "0.95rem",
+          padding: "0.75rem 1.4rem",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.6rem",
+        }}
         disabled={starting}
         onClick={() => {
           setStarting(true);
           window.location.href = `/api/auth/start${sandbox ? "?sandbox=1" : ""}`;
         }}
       >
+        {/* The Salesforce mark keeps its own blue rather than being tinted to the
+            lime — a recoloured vendor logo reads as a knock-off, which is the
+            opposite of what this button needs to convey. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/salesforce.svg" alt="" className="sf-mark" aria-hidden="true" />
         {starting ? "Redirecting to Salesforce…" : "Connect Salesforce →"}
       </button>
 

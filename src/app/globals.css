@@ -38,6 +38,29 @@ html {
   color: hsl(var(--base-content));
 }
 
+/*
+ * Landing-page wash, adapted from datajungle.io's hero. Two soft radials in the
+ * brand lime and blue, fixed so they sit behind the content rather than
+ * scrolling with it. Kept very low opacity — this should register as depth, not
+ * as decoration competing with the numbers.
+ */
+.landing {
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 84% 8%, rgba(181, 211, 51, 0.1), transparent 38%),
+    radial-gradient(circle at 98% 55%, rgba(137, 207, 240, 0.07), transparent 32%);
+  background-attachment: fixed;
+}
+
+@media (prefers-color-scheme: light) {
+  .landing {
+    background-image:
+      radial-gradient(circle at 84% 8%, rgba(157, 211, 26, 0.14), transparent 38%),
+      radial-gradient(circle at 98% 55%, rgba(77, 196, 233, 0.09), transparent 32%),
+      linear-gradient(180deg, #fafafa, #ffffff 70%);
+  }
+}
+
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -68,6 +91,52 @@ body {
   background-color: hsl(var(--base-100));
   font-weight: 700;
   font-size: 0.95rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  opacity: 0.95;
+  transition: opacity 0.12s ease-in-out;
+}
+
+.brand:hover {
+  opacity: 1;
+}
+
+/* The wordmark ships in two colourways; show whichever suits the surface. */
+.brand img {
+  display: block;
+}
+
+@media (prefers-color-scheme: light) {
+  .brand img {
+    content: url("/dj-logo-light.svg");
+  }
+}
+
+.topbar-cta {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0a2a1f;
+  background: #b5d333;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: filter 0.12s ease-in-out;
+}
+
+.topbar-cta:hover {
+  filter: brightness(1.06);
+}
+
+/* Salesforce mark, used to make the connect action unmistakable. */
+.sf-mark {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+  vertical-align: -0.2em;
 }
 
 .app-sidebar {
