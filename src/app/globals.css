@@ -83,7 +83,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 52px;
+  /* Taller now that the CTA is a real button rather than a small pill. */
+  height: 60px;
   /* Right padding matches .app-main so the CTA lines up with the right edge of
      the KPI tiles and the table, rather than floating past them. */
   padding: 0 2rem 0 1.25rem;
@@ -91,6 +92,27 @@ body {
   background-color: hsl(var(--base-100));
   font-weight: 700;
   font-size: 0.95rem;
+}
+
+/*
+ * Landing variant: the bar still spans the viewport (so the border does too),
+ * but its contents track the centred content column. Otherwise the wordmark and
+ * the CTA sit pinned to the window edges, hundreds of pixels from the text they
+ * belong to.
+ */
+.app-topbar--centered {
+  padding: 0;
+}
+
+.topbar-inner {
+  width: 100%;
+  /* Matches the landing <main>: same max-width, same horizontal padding. */
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .brand {
@@ -117,13 +139,17 @@ body {
 }
 
 .topbar-cta {
-  font-size: 0.78rem;
+  /* Sized to hold its own against the wordmark — at 0.78rem it read as a
+     secondary link rather than the page's one standing call to action. */
+  font-size: 0.9rem;
   font-weight: 700;
   color: #0a2a1f;
   background: #b5d333;
-  padding: 0.4rem 0.85rem;
-  border-radius: 6px;
+  padding: 0.55rem 1.15rem;
+  border-radius: 8px;
+  line-height: 1.2;
   text-decoration: none;
+  white-space: nowrap;
   transition: filter 0.12s ease-in-out;
 }
 

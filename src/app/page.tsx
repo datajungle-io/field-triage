@@ -20,19 +20,21 @@ export default function HomePage({
 
   return (
     <div className="landing">
-      <div className="app-topbar">
-        <a href="https://datajungle.io" target="_blank" rel="noreferrer" className="brand">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/dj-logo-dark.svg" alt="Data Jungle" height={22} />
-        </a>
-        <a
-          href="https://calendly.com/brendan-mcdonald/30min"
-          target="_blank"
-          rel="noreferrer"
-          className="topbar-cta"
-        >
-          Book a call
-        </a>
+      <div className="app-topbar app-topbar--centered">
+        <div className="topbar-inner">
+          <a href="https://datajungle.io" target="_blank" rel="noreferrer" className="brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/dj-logo-dark.svg" alt="Data Jungle" height={20} />
+          </a>
+          <a
+            href="https://calendly.com/brendan-mcdonald/30min"
+            target="_blank"
+            rel="noreferrer"
+            className="topbar-cta"
+          >
+            Book a call
+          </a>
+        </div>
       </div>
 
       <main
