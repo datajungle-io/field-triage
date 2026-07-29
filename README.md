@@ -102,32 +102,58 @@ RLS) and does not protect `purge_expired_scans` (RPC-callable, and it DELETEs). 
 migration revokes everything from `anon` and `authenticated`, including default privileges
 so a later migration can't reopen it.
 
-### 2. Salesforce External Client App
+### 2. Salesforce Connected App
+
+> **Why not an External Client App?** ECAs are the successor and Connected App creation is
+> already disabled by default in newer orgs. We migrated, and it worked — for users of the
+> org that defined it. Any other org fails with
+> `OAUTH_AUTHORIZATION_BLOCKED: Cross-org OAuth flows are not supported for this external
+> client app`. That is fatal here: the entire premise is that a stranger's org connects
+> without installing anything. `distributionState: Packaged` would presumably lift the
+> restriction, but a packaged app must be installed in the target org first — the same
+> problem in different clothing. **Connected Apps remain the only mechanism supporting
+> anonymous cross-org OAuth.** The ECA metadata is kept under
+> `externalClientApps/` for whenever Salesforce ships an equivalent.
+>
+> Consequence: the app must live in an org that permits Connected App creation. Newer orgs
+> (including the CS Toolkit PBO) need a support case to enable it.
 
 Deployed as metadata from `salesforce/`, not clicked through Setup, so the configuration is
 reviewable and reproducible:
 
 ```bash
 cd salesforce
-sf project deploy start --target-org <alias> \
-  --metadata ExternalClientApplication ExtlClntAppGlobalOauthSettings ExtlClntAppOauthSettings
+sf project deploy start --target-org <alias> --metadata ConnectedApp
 
 # Salesforce generates the consumer key on create — retrieve to read it
-sf project retrieve start --target-org <alias> \
-  --metadata ExtlClntAppGlobalOauthSettings:Field_Triage_glbloauth \
-  --target-metadata-dir /tmp/eca
+sf project retrieve start --target-org <alias> --metadata ConnectedApp:Field_Triage \
+  --target-metadata-dir /tmp/ca
 # then unzip and read <consumerKey> into SF_CLIENT_ID
-
-# finally, the policy (Salesforce auto-creates a default; this overrides IP relaxation)
-sf project deploy start --target-org <alias> --metadata ExtlClntAppOauthConfigurablePolicies
 ```
 
-**Not a Connected App.** Salesforce is deprecating those — creation is already disabled by
-default in newer orgs and only re-enabled by a support case. External Client Apps are the
-successor. If you ever need to look at the old definition, it's still in
-`connectedApps/Field_Triage.connectedApp-meta.xml`.
+Settings that matter:
 
-Things that cost time to discover, preserved here so they don't have to be rediscovered:
+- **`isAdminApproved: false`** — any user self-authorizes. The alternative requires every
+  prospective user's org to pre-approve the app, which for a public lead magnet means
+  nobody can use it.
+- **`isConsumerSecretOptional: true`** so setup can be fully scripted. Salesforce will not
+  release a consumer secret over any API — only the key is retrievable — so a scripted
+  deploy could otherwise never finish. Safe because PKCE is mandatory; together they are
+  the standard public-client configuration. Set `SF_CLIENT_SECRET` later to run as a
+  confidential client; the code supports both.
+- **No `RefreshToken` scope.** The app structurally cannot return to anyone's org.
+- New apps take **2–5 minutes to propagate**; `invalid_client_id` before then is expected.
+
+The consumer key works cross-org. Only orgs with API Access Control enabled need to
+whitelist it explicitly.
+
+<details>
+<summary>External Client App notes (not in use — kept for when ECAs support cross-org)</summary>
+
+The ECA metadata under `externalClientApps/`, `extlClntAppGlobalOauthSets/`,
+`extlClntAppOauthSettings/` and `extlClntAppOauthPolicies/` is complete and deploys
+cleanly. It is unused only because of the cross-org restriction above. What cost time to
+work out, so it doesn't have to be rediscovered:
 
 - **Naming is by convention**, not just the `externalClientApplication` field:
   `<App>_glbloauth`, `<App>_oauth`, and the auto-created `<App>_oauth_defaultPolicy`.
@@ -136,17 +162,14 @@ Things that cost time to discover, preserved here so they don't have to be redis
   `ExtlClntAppOauthSettings`, not the global settings.
 - **`isCodeCredFlowEnabled`** is what enables the web server (authorization code) flow.
   Without it the authorize endpoint rejects the request whatever the scopes say.
-- **`permittedUsersPolicyType` is `AllSelfAuthorized`.** `AdminApprovedPreAuthorized` would
-  require every prospective user's org to pre-approve the app — for a public lead magnet,
-  that means nobody can use it.
+- **`permittedUsersPolicyType` is `AllSelfAuthorized`.** Deploy without the policy and read
+  the enum off the record Salesforce auto-creates rather than guessing.
 - **`ipRelaxationPolicyType` must be `Bypass`.** The auto-created default is `Enforce`,
   which fails any user whose org has login IP ranges, at the authorize step, with an error
   they can't diagnose.
 - **Element order follows the XSD sequence.** Out-of-order elements are rejected outright.
-- New apps take **2–5 minutes to propagate**; `invalid_client_id` before then is expected.
 
-The consumer key works cross-org. Only orgs with API Access Control enabled need to
-whitelist it explicitly.
+</details>
 
 ### 3. Environment
 

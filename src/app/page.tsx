@@ -4,7 +4,8 @@ export const dynamic = "force-dynamic";
 
 const ERRORS: Record<string, string> = {
   denied: "You cancelled the Salesforce authorization. Nothing was accessed.",
-  oauth: "Salesforce refused the connection. Your admin may restrict connected apps.",
+  // No guessing at the cause — Salesforce's own message is shown underneath.
+  oauth: "Salesforce refused the connection.",
   invalid: "That sign-in attempt expired or didn't match. Please try again.",
   exchange: "Salesforce accepted the sign-in but the token exchange failed. Please try again.",
   server: "Something broke on our side starting the scan. Please try again.",
@@ -13,7 +14,7 @@ const ERRORS: Record<string, string> = {
 export default function HomePage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: { error?: string; detail?: string };
 }) {
   const error = searchParams.error ? (ERRORS[searchParams.error] ?? ERRORS.server) : null;
 
@@ -45,7 +46,22 @@ export default function HomePage({
         {error && (
           <div className="coverage-banner" style={{ borderLeftColor: "#F07070" }}>
             <span aria-hidden="true">⚠</span>
-            <div>{error}</div>
+            <div>
+              {error}
+              {searchParams.detail && (
+                <div
+                  style={{
+                    marginTop: "0.4rem",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "0.72rem",
+                    color: "hsl(var(--base-content) / 0.6)",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {searchParams.detail}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

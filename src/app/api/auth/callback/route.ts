@@ -19,8 +19,14 @@ export async function GET(request: NextRequest) {
 
   const oauthError = params.get("error");
   if (oauthError) {
-    // User clicked Deny, or the org blocks the connected app.
-    return redirectWithError(request, oauthError === "access_denied" ? "denied" : "oauth");
+    // Salesforce's error_description is the only thing that says WHY. Swallowing
+    // it and substituting a guess ("your admin may restrict connected apps")
+    // makes every failure look like the same failure, and sends people to check
+    // a setting that may have nothing to do with it.
+    const description = params.get("error_description") ?? "";
+    console.error(`OAuth callback error: ${oauthError} — ${description}`);
+    if (oauthError === "access_denied") return redirectWithError(request, "denied");
+    return redirectWithError(request, "oauth", `${oauthError}: ${description}`);
   }
 
   const code = params.get("code");
@@ -83,9 +89,11 @@ export async function GET(request: NextRequest) {
   return response;
 }
 
-function redirectWithError(request: NextRequest, reason: string) {
+function redirectWithError(request: NextRequest, reason: string, detail?: string) {
   const url = new URL("/", request.nextUrl.origin);
   url.searchParams.set("error", reason);
+  // Salesforce's own words, shown verbatim. Truncated only to keep the URL sane.
+  if (detail) url.searchParams.set("detail", detail.slice(0, 300));
   const response = NextResponse.redirect(url);
   response.cookies.delete("ft_oauth");
   return response;

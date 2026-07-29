@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  External Client App for the Field Triage lead magnet.
+  ⚠ NOT IN USE. Kept for reference only — the live app is the ConnectedApp in
+  ../connectedApps/Field_Triage.connectedApp-meta.xml.
 
-  ECAs replace Connected Apps, which Salesforce is deprecating — creation is
-  already disabled by default in newer orgs (the CS Toolkit PBO among them) and
-  only re-enabled by a support case. Building on the successor avoids shipping
-  on a technology that is on its way out.
+  This ECA works, but only for users of the org that defines it. Authorizing
+  from any other org fails with:
+
+      OAUTH_AUTHORIZATION_BLOCKED: Cross-org OAuth flows are not supported
+      for this external client app
+
+  which is fatal for a lead magnet — the entire point is that a stranger's org
+  can connect without installing anything. Verified against two separate orgs.
+
+  distributionState: Packaged would presumably lift that, but a packaged ECA has
+  to be installed in the target org first, which is the same problem wearing a
+  different hat.
+
+  So: Connected Apps remain the only mechanism supporting anonymous cross-org
+  OAuth, despite being deprecated. Revisit when Salesforce ships an ECA
+  equivalent — the migration is otherwise done, and the notes below are correct.
 
   Split across four metadata types by design:
     ExternalClientApplication            the app itself (this file)
