@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { encryptToken, newScanToken } from "@/lib/crypto";
+import { appOrigin } from "@/lib/salesforce/oauth";
 import { createPhaseRows } from "@/lib/scan/runner";
 import { serviceClient } from "@/lib/supabase";
 
@@ -104,5 +105,5 @@ export async function GET(request: NextRequest) {
   }
 
   await createPhaseRows(db, scan.id);
-  return NextResponse.redirect(new URL(`/scan/${scan.token}`, request.nextUrl.origin));
+  return NextResponse.redirect(new URL(`/scan/${scan.token}`, appOrigin()));
 }

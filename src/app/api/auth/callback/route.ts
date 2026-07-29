@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { encryptToken, newScanToken } from "@/lib/crypto";
-import { exchangeCode, loginHostFor } from "@/lib/salesforce/oauth";
+import { appOrigin, exchangeCode, loginHostFor } from "@/lib/salesforce/oauth";
 import { SalesforceClient } from "@/lib/salesforce/client";
 import { createPhaseRows } from "@/lib/scan/runner";
 import { serviceClient } from "@/lib/supabase";
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
         .revoke(loginHostFor(stored.isSandbox))
         .catch(() => {});
 
-      const url = new URL(`/r/${existing.token}`, request.nextUrl.origin);
+      const url = new URL(`/r/${existing.token}`, appOrigin());
       url.searchParams.set("returning", "1");
       const response = NextResponse.redirect(url);
       response.cookies.delete("ft_oauth");
@@ -122,13 +122,21 @@ export async function GET(request: NextRequest) {
 
   await createPhaseRows(db, scan.id);
 
-  const response = NextResponse.redirect(new URL(`/scan/${scan.token}`, request.nextUrl.origin));
+  const response = NextResponse.redirect(new URL(`/scan/${scan.token}`, appOrigin()));
   response.cookies.delete("ft_oauth");
   return response;
 }
 
+/**
+ * Always redirects to APP_URL, never request.nextUrl.origin.
+ *
+ * Behind Netlify + Cloudflare the request origin resolves to the internal
+ * deploy-preview host, which would strand the user on a different domain from
+ * the one their session cookie is scoped to — breaking the next OAuth attempt
+ * with a confusing "sign-in expired" error.
+ */
 function redirectWithError(request: NextRequest, reason: string, detail?: string) {
-  const url = new URL("/", request.nextUrl.origin);
+  const url = new URL("/", appOrigin());
   url.searchParams.set("error", reason);
   // Salesforce's own words, shown verbatim. Truncated only to keep the URL sane.
   if (detail) url.searchParams.set("detail", detail.slice(0, 300));

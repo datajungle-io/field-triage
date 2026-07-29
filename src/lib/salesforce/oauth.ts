@@ -119,8 +119,21 @@ function clientId(): string {
   return value;
 }
 
-export function redirectUri(): string {
+/**
+ * The canonical public origin — the single source of truth for every redirect.
+ *
+ * Never derive this from the incoming request. Behind Netlify and Cloudflare,
+ * `request.nextUrl.origin` is the internal deploy-preview host, so redirecting
+ * to it strands the user on a domain their session cookie isn't scoped to. The
+ * next OAuth attempt then fails at the callback with "that sign-in attempt
+ * expired", because the cookie set on one host is never sent to the other.
+ */
+export function appOrigin(): string {
   const base = process.env.APP_URL;
   if (!base) throw new Error("APP_URL is not set");
-  return `${base.replace(/\/+$/, "")}/api/auth/callback`;
+  return base.replace(/\/+$/, "");
+}
+
+export function redirectUri(): string {
+  return `${appOrigin()}/api/auth/callback`;
 }
