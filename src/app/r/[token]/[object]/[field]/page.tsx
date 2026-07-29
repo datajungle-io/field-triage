@@ -137,7 +137,7 @@ export default async function FieldDrillPage({
       <p className="section-note">
         Here are the references to this field, sorted alphabetically by reference type — the
         same view as Salesforce Setup&apos;s &quot;Where is this used?&quot; button. To make
-        the field safe to delete, remove each one; never delete the field first.
+        the field safe to remove, clear each one; never delete the field first.
       </p>
 
       {summary.size > 0 && (

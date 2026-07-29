@@ -61,7 +61,25 @@ export function Shell({
           */}
           {orgName && (
             <div className="sidebar-org">
-              <div className="sidebar-org-name">{orgName}</div>
+              {/*
+                The Salesforce mark sits here, beside the org name, and nowhere
+                else in the chrome. Next to the org it reads as a source label —
+                "this data came from Salesforce" — which is true and useful. Up
+                in the topbar beside our own wordmark it would read as a badge,
+                implying a partnership or endorsement that doesn't exist.
+              */}
+              <div className="sidebar-org-name">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/salesforce.svg"
+                  alt=""
+                  aria-hidden="true"
+                  width={20}
+                  height={14}
+                  className="sidebar-org-mark"
+                />
+                {orgName}
+              </div>
               {scannedAt && (
                 <div className="sidebar-org-meta">Scanned {fmtDate(scannedAt)}</div>
               )}

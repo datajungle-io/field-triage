@@ -159,7 +159,7 @@ export default async function DetailPage({
 
       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem" }}>
         <FilterChip href={query({ safe: safeOnly ? "" : "1" })} active={safeOnly}>
-          Delete-ready only
+          Candidates only
         </FilterChip>
         <FilterChip href={query({ zeroDeps: zeroDepsOnly ? "" : "1" })} active={zeroDepsOnly}>
           Zero dependencies only
@@ -183,7 +183,7 @@ export default async function DetailPage({
         Showing <strong>{fmt(rows.length)}</strong>{" "}
         {showStandard ? "" : "custom "}field{rows.length === 1 ? "" : "s"}
         {object !== "All Objects" ? ` on ${object}` : ""}
-        {safeOnly ? " · delete-ready" : ""}
+        {safeOnly ? " · deletion candidates" : ""}
         {zeroDepsOnly ? " · zero dependencies" : ""}.
         {(hiddenStandard > 0 || hiddenNoData > 0) && (
           <span style={{ color: "hsl(var(--base-content) / 0.55)" }}>

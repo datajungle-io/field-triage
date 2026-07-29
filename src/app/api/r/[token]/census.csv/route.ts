@@ -39,8 +39,8 @@ export async function GET(
     "Dependencies",
     "On Layout",
     "Last Modified Date",
-    "Safe to Delete",
-    "Ready 0 Deps",
+    "Deletion Candidate",
+    "Candidate 0 Deps",
   ];
 
   const lines = [header.join(",")];

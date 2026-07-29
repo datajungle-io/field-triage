@@ -96,7 +96,7 @@ export default async function FieldTriagePage({
 
       <h1 className="page-title">Field Triage</h1>
       <p className="page-intro">
-        Org-wide field health at a glance. Pick the object with the most delete-ready fields
+        Org-wide field health at a glance. Pick the object with the most deletion candidates
         and start there — or open the full{" "}
         <Link href={`/r/${scan.token}/detail`}>triage detail</Link>.
       </p>
@@ -137,7 +137,11 @@ export default async function FieldTriagePage({
 
         <Link className="kpi-tile kpi-link tile-red" href={`/r/${scan.token}/detail?safe=1`}>
           <div className="tile-value">{fmt(summary.delete_ready)}</div>
-          <div className="tile-label">Safe to Delete</div>
+          {/* "Candidates", not "Safe to Delete". Low population and a stale
+              definition date make a field worth looking at; neither establishes
+              that removing it is safe. Claiming otherwise to an admin who may
+              act on it in production is a promise the scan cannot keep. */}
+          <div className="tile-label">Deletion Candidates</div>
           <div className="tile-sub">&lt;1% populated · unchanged 90+ days</div>
         </Link>
 
@@ -146,7 +150,7 @@ export default async function FieldTriagePage({
           href={`/r/${scan.token}/detail?safe=1&zeroDeps=1`}
         >
           <div className="tile-value">{fmt(summary.ready_no_deps)}</div>
-          <div className="tile-label">Safe to Delete — No Dependencies</div>
+          <div className="tile-label">Candidates · No Dependencies</div>
           {depsSettled ? (
             <div className="tile-sub">zero references anywhere · start here</div>
           ) : (

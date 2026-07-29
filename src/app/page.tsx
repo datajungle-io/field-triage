@@ -137,8 +137,8 @@ export default function HomePage({
                 <div className="mk-preview-tiles">
                   {[
                     ["822", "Fields scanned", ""],
-                    ["149", "Safe to delete", "tile-red"],
-                    ["34", "Ready · 0 deps", "tile-lime"],
+                    ["149", "Deletion candidates", "tile-red"],
+                    ["34", "No dependencies", "tile-lime"],
                   ].map(([n, label, cls]) => (
                     <div key={label} className={`mk-preview-tile ${cls}`}>
                       <div className="mk-preview-num">{n}</div>

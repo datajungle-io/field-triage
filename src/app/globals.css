@@ -545,6 +545,19 @@ body {
   color: hsl(var(--base-heading));
   line-height: 1.3;
   margin-bottom: 0.3rem;
+  /* Flex so the mark hangs beside a wrapping org name rather than sitting on
+     the baseline of its last line. */
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+/* Nudged down to sit on the cap height of the first line, and held at its
+   natural size so a long org name can't squeeze it. */
+.sidebar-org-mark {
+  flex: none;
+  margin-top: 2px;
+  opacity: 0.9;
 }
 
 .sidebar-org-meta {

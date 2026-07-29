@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Field Triage — Data Jungle",
   description:
-    "Free Salesforce field audit. Connect your org and see which custom fields are dead, which are safe to delete, and which have zero dependencies blocking removal.",
+    "Free Salesforce field audit. Connect your org and see which custom fields are dead, which are deletion candidates, and which have zero dependencies blocking removal.",
   robots: { index: true, follow: true },
   // Matches datajungle.io. src/app/icon.svg is picked up automatically by the
   // App Router; these are declared as well so the apple-touch icon and any

@@ -37,7 +37,7 @@ export async function notifyNewScan(scanId: string): Promise<void> {
   const reportUrl = `${PUBLIC_ORIGIN}/r/${scan.token}`;
   const headline =
     `${lead.org_name ?? "Unknown org"}${lead.is_sandbox ? " (sandbox)" : ""} · ` +
-    `${fmt(lead.fields_scanned)} fields · ${fmt(lead.delete_ready)} delete-ready · ` +
+    `${fmt(lead.fields_scanned)} fields · ${fmt(lead.delete_ready)} candidates · ` +
     `${fmt(lead.ready_no_deps)} with zero dependencies`;
 
   const lines = [
