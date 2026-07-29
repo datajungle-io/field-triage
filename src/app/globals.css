@@ -38,27 +38,372 @@ html {
   color: hsl(var(--base-content));
 }
 
-/*
- * Landing-page wash, adapted from datajungle.io's hero. Two soft radials in the
- * brand lime and blue, fixed so they sit behind the content rather than
- * scrolling with it. Kept very low opacity — this should register as depth, not
- * as decoration competing with the numbers.
- */
-.landing {
+/* ---------------------------------------------------------------------------
+ * MARKETING SURFACE — the landing page only.
+ *
+ * Ported from datajungle.io so someone arriving from the marketing site sees
+ * the same brand, then feels a deliberate shift into product styling once
+ * they're inside a report. That continuity matters more here than on a typical
+ * landing page: this is where a stranger decides whether to hand over
+ * Salesforce access, and "is this the same company I was just reading about?"
+ * is the question standing between them and the connect button.
+ *
+ * Dark throughout, so it also sits continuously against the report.
+ *
+ * Tokens lifted from datajungle.io: container 1184px, section padding
+ * 16/48/128px, Inter, 9999px pills, the lime CTA and its glow.
+ * ------------------------------------------------------------------------- */
+
+.marketing {
   min-height: 100vh;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background-color: #0b1116;
   background-image:
-    radial-gradient(circle at 84% 8%, rgba(181, 211, 51, 0.1), transparent 38%),
-    radial-gradient(circle at 98% 55%, rgba(137, 207, 240, 0.07), transparent 32%);
+    radial-gradient(circle at 82% 6%, rgba(157, 211, 26, 0.13), transparent 38%),
+    radial-gradient(circle at 98% 52%, rgba(77, 196, 233, 0.09), transparent 32%);
   background-attachment: fixed;
+  color: #e8eaed;
 }
 
-@media (prefers-color-scheme: light) {
-  .landing {
-    background-image:
-      radial-gradient(circle at 84% 8%, rgba(157, 211, 26, 0.14), transparent 38%),
-      radial-gradient(circle at 98% 55%, rgba(77, 196, 233, 0.09), transparent 32%),
-      linear-gradient(180deg, #fafafa, #ffffff 70%);
+/* datajungle.io's rhythm: 16 / 48 / 128px side padding, 1184px container. */
+.mk-pad {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 768px) {
+  .mk-pad {
+    padding-left: 48px;
+    padding-right: 48px;
   }
+}
+
+@media (min-width: 1280px) {
+  .mk-pad {
+    padding-left: 128px;
+    padding-right: 128px;
+  }
+}
+
+.mk-container {
+  max-width: 1184px;
+  margin: 0 auto;
+}
+
+/* Floating pill nav, matching Navbar.tsx — dark surface instead of white/90. */
+.mk-nav-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .mk-nav-wrap {
+    padding-top: 1rem;
+  }
+}
+
+.mk-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 9999px;
+  background: rgba(18, 24, 32, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 4px 20.1px rgba(0, 0, 0, 0.25);
+  padding: 0.6rem 0.75rem 0.6rem 1rem;
+}
+
+.mk-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: fit-content;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.5rem 1rem;
+  font-size: 13px;
+  font-weight: 500;
+  color: #9ea3ab;
+}
+
+.mk-eyebrow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #9dd31a;
+  flex: none;
+}
+
+.mk-h1 {
+  font-size: 42px;
+  line-height: 1.02;
+  letter-spacing: -1.5px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .mk-h1 {
+    font-size: 56px;
+  }
+}
+
+.mk-lede {
+  font-size: 19px;
+  line-height: 1.5;
+  color: #9ea3ab;
+  max-width: 620px;
+  margin: 0;
+}
+
+.mk-h2 {
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.8px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .mk-h2 {
+    font-size: 32px;
+  }
+}
+
+.mk-body {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #9ea3ab;
+}
+
+/* btn-glass / btn-glass-cta from datajungle.io globals.css. */
+.mk-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  font-size: 16px;
+  font-weight: 600;
+  height: 48px;
+  padding: 0 26px;
+  color: #00381f;
+  background: #9dd31a;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 8px 22px rgba(157, 211, 26, 0.3);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.mk-cta:hover:not(:disabled) {
+  background: #8bc017;
+  transform: translateY(-2px);
+}
+
+.mk-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Smaller pill for the nav. */
+.mk-cta-sm {
+  height: 40px;
+  padding: 0 20px;
+  font-size: 15px;
+  box-shadow: none;
+}
+
+.mk-card {
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.025);
+  padding: 2rem;
+}
+
+.mk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.mk-table th {
+  text-align: left;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: #6f757e;
+  padding: 0 0 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.mk-table td {
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  color: #b6bbc2;
+  vertical-align: top;
+}
+
+.mk-table td:first-child {
+  color: #e8eaed;
+  padding-right: 2rem;
+  width: 42%;
+}
+
+/* ---------------------------------------------------------------------------
+ * Hero layout + report preview.
+ *
+ * The preview is decorative (aria-hidden) and labelled "example" — it shows the
+ * shape of the deliverable, which sells better than describing it, but it must
+ * never be mistaken for the reader's own numbers.
+ * ------------------------------------------------------------------------- */
+
+.mk-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
+@media (min-width: 1024px) {
+  .mk-hero {
+    flex-direction: row;
+    align-items: center;
+    gap: 3.5rem;
+  }
+}
+
+.mk-preview {
+  width: 100%;
+  max-width: 460px;
+  flex: none;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #121820;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  font-family: "Mozilla Text", system-ui, sans-serif;
+}
+
+.mk-preview-chrome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.mk-preview-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.mk-preview-title {
+  margin-left: auto;
+  font-size: 11px;
+  color: #6f757e;
+  letter-spacing: 0.03em;
+}
+
+.mk-preview-body {
+  padding: 18px;
+}
+
+.mk-preview-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.mk-preview-tile {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px 10px;
+}
+
+.mk-preview-num {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  color: #e8eaed;
+  font-variant-numeric: tabular-nums;
+}
+
+.mk-preview-tile.tile-red .mk-preview-num {
+  color: #f07070;
+}
+.mk-preview-tile.tile-lime .mk-preview-num {
+  color: #b5d333;
+}
+
+.mk-preview-label {
+  font-size: 10.5px;
+  color: #6f757e;
+  margin-top: 5px;
+}
+
+.mk-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+  font-size: 12px;
+}
+
+.mk-preview-obj {
+  width: 84px;
+  flex: none;
+  color: #b6bbc2;
+}
+
+.mk-preview-bar {
+  display: flex;
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mk-preview-bar .seg {
+  flex-basis: 0;
+}
+.mk-preview-bar .s0 {
+  background: #f07070;
+}
+.mk-preview-bar .s1 {
+  background: #f5b731;
+}
+.mk-preview-bar .s2 {
+  background: #89cff0;
+}
+.mk-preview-bar .s3 {
+  background: #b5d333;
+}
+
+.mk-preview-ready {
+  width: 26px;
+  text-align: right;
+  flex: none;
+  color: #b5d333;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 body {

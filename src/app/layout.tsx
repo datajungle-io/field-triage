@@ -22,8 +22,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/*
+          Inter is loaded for the landing page only, to match datajungle.io.
+          Once you're inside a report the app switches to Mozilla Text — the
+          face the real dashboards use — so the shift from marketing site to
+          product is something you feel rather than read.
+        */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Mozilla+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Mozilla+Text:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
       </head>
