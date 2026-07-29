@@ -12,6 +12,7 @@ export interface ScanRecord {
   org_name: string | null;
   org_type: string | null;
   is_sandbox: boolean;
+  is_cli_session: boolean;
   /**
    * The connected org's own domain. Setup deep links must be built against it —
    * the production dashboard can hardcode one org's URL, a multi-tenant tool
@@ -30,7 +31,7 @@ export async function scanByToken(token: string): Promise<ScanRecord | null> {
   const { data, error } = await serviceClient()
     .from("scans")
     .select(
-      "id, token, status, org_name, org_type, is_sandbox, instance_url, error, created_at, completed_at, expires_at",
+      "id, token, status, org_name, org_type, is_sandbox, is_cli_session, instance_url, error, created_at, completed_at, expires_at",
     )
     .eq("token", token)
     .maybeSingle();

@@ -39,7 +39,7 @@ export function Shell({
         <div className="app-topbar-inner">
           <a href="https://datajungle.io" target="_blank" rel="noreferrer" className="brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/dj-logo-dark.svg" alt="Data Jungle" height={26} />
+            <img src="/dj-logo-dark.svg" alt="Data Jungle" height={20} />
           </a>
           <a
             href="https://calendly.com/brendan-mcdonald/30min"

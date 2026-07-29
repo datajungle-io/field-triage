@@ -56,7 +56,7 @@ export default function HomePage({
         <nav className="mk-nav mk-container">
           <a href="https://datajungle.io" target="_blank" rel="noreferrer" className="brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/dj-logo-dark.svg" alt="Data Jungle" height={30} />
+            <img src="/dj-logo-dark.svg" alt="Data Jungle" height={22} />
           </a>
           <a
             href="https://calendly.com/brendan-mcdonald/30min"

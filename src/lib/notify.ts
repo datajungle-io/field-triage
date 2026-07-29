@@ -1,6 +1,18 @@
 import { serviceClient } from "@/lib/supabase";
 
 /**
+ * Origin used in outbound email — always the public site.
+ *
+ * APP_URL is the *running instance's* origin, which is localhost in
+ * development. Mail leaves the machine, so a link built from it is dead on
+ * arrival. Override with PUBLIC_APP_URL if the domain ever changes.
+ */
+const PUBLIC_ORIGIN = (process.env.PUBLIC_APP_URL ?? "https://triage.datajungle.io").replace(
+  /\/+$/,
+  "",
+);
+
+/**
  * Lead alert on scan completion.
  *
  * Deliberately dependency-free: a POST to Resend and/or a Slack-style webhook,
@@ -19,7 +31,7 @@ export async function notifyNewScan(scanId: string): Promise<void> {
   const { data: scan } = await db.from("scans").select("token").eq("id", scanId).single();
   if (!lead || !scan) return;
 
-  const reportUrl = `${(process.env.APP_URL ?? "").replace(/\/+$/, "")}/r/${scan.token}`;
+  const reportUrl = `${PUBLIC_ORIGIN}/r/${scan.token}`;
   const headline =
     `${lead.org_name ?? "Unknown org"}${lead.is_sandbox ? " (sandbox)" : ""} · ` +
     `${fmt(lead.fields_scanned)} fields · ${fmt(lead.delete_ready)} delete-ready · ` +
@@ -47,10 +59,37 @@ export async function notifyNewScan(scanId: string): Promise<void> {
  *
  * Skipped for CLI-session scans, which are ours and not a lead.
  */
-export async function sendReportToUser(scanId: string): Promise<void> {
+export interface SendReportOptions {
+  /**
+   * Override the recipient. Resend's shared onboarding sender can only deliver
+   * to the account owner, so testing the template against a real scan needs a
+   * way to redirect it.
+   */
+  to?: string;
+  /**
+   * Throw instead of returning quietly. Normal sends stay silent — a missing
+   * mailer must never fail a finished scan — but a deliberate test needs to be
+   * told why nothing arrived.
+   */
+  strict?: boolean;
+}
+
+export async function sendReportToUser(
+  scanId: string,
+  opts: SendReportOptions = {},
+): Promise<void> {
+  const { to: overrideTo, strict = false } = opts;
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.REPORT_FROM_EMAIL ?? process.env.LEAD_ALERT_FROM;
-  if (!apiKey || !from) return;
+  if (!apiKey || !from) {
+    // Silent no-op in normal operation — an unconfigured mailer must never fail
+    // a finished scan. But when someone is explicitly testing, silence is the
+    // wrong answer: say why nothing was sent.
+    if (strict) {
+      throw new Error("RESEND_API_KEY and REPORT_FROM_EMAIL must both be set");
+    }
+    return;
+  }
 
   const db = serviceClient();
   const { data: scan } = await db
@@ -58,16 +97,26 @@ export async function sendReportToUser(scanId: string): Promise<void> {
     .select("token, org_name, is_cli_session, expires_at")
     .eq("id", scanId)
     .single();
-  if (!scan || scan.is_cli_session) return;
+  // CLI-session scans are ours, not a lead — skipped unless a test asks for it.
+  if (!scan) {
+    if (strict) throw new Error("Scan not found");
+    return;
+  }
+  if (scan.is_cli_session && !strict) return;
 
   const { data: lead } = await db
     .from("leads")
     .select("name, email, fields_scanned, delete_ready, ready_no_deps")
     .eq("scan_id", scanId)
     .single();
-  if (!lead?.email) return;
 
-  const url = `${(process.env.APP_URL ?? "").replace(/\/+$/, "")}/r/${scan.token}`;
+  const recipient = overrideTo ?? lead?.email;
+  if (!lead || !recipient) {
+    if (strict) throw new Error("No lead row, or no address to send to");
+    return;
+  }
+
+  const url = `${PUBLIC_ORIGIN}/r/${scan.token}`;
   const expires = new Date(scan.expires_at).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -82,8 +131,12 @@ export async function sendReportToUser(scanId: string): Promise<void> {
     url,
     "",
     `We scanned ${fmt(lead.fields_scanned)} fields across Lead, Account, Contact and Opportunity.`,
-    `${fmt(lead.delete_ready)} are delete-ready — under 1% populated and untouched for 90+ days.`,
-    `${fmt(lead.ready_no_deps)} of those have zero references anywhere in Salesforce, so they can go as-is.`,
+    lead.delete_ready === 1
+      ? "1 is delete-ready — under 1% populated and untouched for 90+ days."
+      : `${fmt(lead.delete_ready)} are delete-ready — under 1% populated and untouched for 90+ days.`,
+    lead.ready_no_deps === 1
+      ? "1 of those has zero references anywhere in Salesforce, so it can go as-is."
+      : `${fmt(lead.ready_no_deps)} of those have zero references anywhere in Salesforce, so they can go as-is.`,
     "",
     "Start with the zero-dependency ones — nothing has to be untangled first.",
     "",
@@ -94,17 +147,25 @@ export async function sendReportToUser(scanId: string): Promise<void> {
     "https://datajungle.io",
   ].join("\n");
 
-  await fetch("https://api.resend.com/emails", {
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from,
-      to: lead.email,
+      to: recipient,
       subject: `Your Field Triage report — ${fmt(lead.delete_ready)} fields you can delete`,
       text,
     }),
     signal: AbortSignal.timeout(15_000),
   });
+
+  if (!res.ok) {
+    const body = await res.text();
+    // Resend's rejection reason is the whole diagnosis — a bad key, an
+    // unverified domain, a recipient the shared sender can't reach.
+    if (strict) throw new Error(`Resend ${res.status}: ${body.slice(0, 300)}`);
+    console.error(`Report email failed: ${res.status} ${body.slice(0, 200)}`);
+  }
 }
 
 async function sendEmail(subject: string, body: string): Promise<void> {
