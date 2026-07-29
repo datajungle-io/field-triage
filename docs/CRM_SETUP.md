@@ -101,6 +101,42 @@ Then assign the app to your own profile or a permission set. **The JWT flow
 fails until this assignment exists** — that is the single most common cause of
 `invalid_grant: user hasn't approved this consumer`.
 
+## 3b. Interim: SOAP login (no Connected App needed)
+
+Connected App creation in the PBO is pending a Salesforce approval
+(case #474206513). Until it clears, the push can authenticate with the SOAP
+`login()` call instead.
+
+This works where OAuth doesn't because `login()` predates Connected Apps —
+username, password + security token, session id, no OAuth client anywhere in
+the exchange. The returned session id behaves exactly like an access token
+against the REST API, so only the credential swaps; the upsert is unchanged.
+
+```
+SF_CRM_USERNAME       = brendan@datajungle.io
+SF_CRM_PASSWORD       = <the account password>
+SF_CRM_SECURITY_TOKEN = <from Setup → My Personal Information → Reset My Security Token>
+```
+
+`config()` prefers JWT whenever `SF_CRM_CLIENT_ID` and `SF_CRM_PRIVATE_KEY` are
+both present, so migrating later means **adding** two variables — no code
+change, and no window where both paths are live. Delete the password pair once
+JWT is confirmed working.
+
+Treat this as temporary, for reasons that are not academic:
+
+- It hands over a **full user session**, not a scoped grant. JWT can be limited
+  to `api`; this cannot be limited at all.
+- It **breaks silently on password rotation** — the security token is
+  regenerated whenever the password changes, and the next scan simply logs a
+  failed push.
+- **Profile login IP ranges will block it.** Netlify's egress addresses are
+  dynamic, so if the user's profile restricts login IPs this fails in production
+  while working from your laptop. Check Setup → Profiles → Login IP Ranges
+  before relying on it.
+- The password and token in environment variables are a shared secret in a way
+  a certificate's public half is not.
+
 ## 4. Environment variables
 
 ```
@@ -109,6 +145,7 @@ SF_CRM_USERNAME     = brendan@datajungle.io
 SF_CRM_PRIVATE_KEY  = <contents of ~/.field-triage-crm/server.key>
 SF_CRM_LOGIN_URL    = https://login.salesforce.com   (optional, this is the default)
 CRM_LEAD_SOURCE     = <optional>
+CRM_WEBSITE_FORM    = <optional>
 ```
 
 On Netlify, paste the private key with real newlines; literal `\n` sequences are

@@ -76,7 +76,8 @@ export async function runFinalize(ctx: PhaseContext): Promise<PhaseResult> {
       .then((result) =>
         ctx.log(
           result.pushed
-            ? `CRM: Lead ${result.created ? "created" : "updated"}${result.leadId ? ` (${result.leadId})` : ""}.`
+            ? `CRM: Lead ${result.created ? "created" : "updated"}${result.leadId ? ` (${result.leadId})` : ""}` +
+              `${result.auth === "soap" ? " via SOAP login (interim auth)" : ""}.`
             : `CRM: skipped — ${result.reason}.`,
         ),
       )

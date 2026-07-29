@@ -41,21 +41,98 @@ const ORG_ID_FIELD = "Field_Triage_Org_Id__c";
 const LEAD_SOURCE = process.env.CRM_LEAD_SOURCE ?? "Website";
 const WEBSITE_FORM = process.env.CRM_WEBSITE_FORM ?? "Field Triage";
 
-interface CrmConfig {
-  clientId: string;
-  username: string;
-  privateKey: string;
-}
+/**
+ * Two ways in, deliberately.
+ *
+ * JWT is the destination: a certificate, no shared secret, nothing that expires
+ * on a password policy. It needs a Connected App, and creating one in the PBO is
+ * currently blocked pending a Salesforce approval.
+ *
+ * The SOAP login() call is the interim, and it works precisely because it is
+ * older than Connected Apps — username, password+token, session id, no OAuth
+ * client involved at all. That is also the reason to treat it as temporary: it
+ * hands over a full user session rather than a scoped grant, and it breaks
+ * silently the moment the password is rotated, since the security token is
+ * regenerated with it.
+ */
+type CrmConfig =
+  | { kind: "jwt"; clientId: string; username: string; privateKey: string }
+  | { kind: "soap"; username: string; password: string; securityToken: string };
 
 function config(): CrmConfig | null {
-  const clientId = process.env.SF_CRM_CLIENT_ID;
   const username = process.env.SF_CRM_USERNAME;
+  if (!username) return null;
+
+  const clientId = process.env.SF_CRM_CLIENT_ID;
   // Netlify's UI collapses newlines in pasted values, so the key is accepted
   // with literal \n sequences and normalised here. A PEM with the wrong line
   // breaks fails signing with an unhelpful error.
   const privateKey = process.env.SF_CRM_PRIVATE_KEY?.replace(/\\n/g, "\n");
-  if (!clientId || !username || !privateKey) return null;
-  return { clientId, username, privateKey };
+
+  // JWT wins whenever it is fully configured, so switching over is a matter of
+  // adding two variables — no code change, no window where both are live.
+  if (clientId && privateKey) return { kind: "jwt", clientId, username, privateKey };
+
+  const password = process.env.SF_CRM_PASSWORD;
+  const securityToken = process.env.SF_CRM_SECURITY_TOKEN;
+  if (password && securityToken) return { kind: "soap", username, password, securityToken };
+
+  return null;
+}
+
+function xmlEscape(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+/**
+ * Authenticate with the SOAP login() call.
+ *
+ * The password field is the password with the security token appended — no
+ * separator. Salesforce returns a session id that behaves exactly like an OAuth
+ * access token against the REST API, so nothing downstream needs to know which
+ * flow produced it.
+ */
+async function soapLogin(cfg: Extract<CrmConfig, { kind: "soap" }>) {
+  // The SOAP endpoint takes a bare version number; API_VERSION carries a "v".
+  const version = API_VERSION.replace(/^v/, "");
+  const envelope =
+    `<?xml version="1.0" encoding="utf-8"?>` +
+    `<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/">` +
+    `<env:Body><n1:login xmlns:n1="urn:partner.soap.sforce.com">` +
+    `<n1:username>${xmlEscape(cfg.username)}</n1:username>` +
+    `<n1:password>${xmlEscape(cfg.password + cfg.securityToken)}</n1:password>` +
+    `</n1:login></env:Body></env:Envelope>`;
+
+  const res = await fetch(`${LOGIN_URL}/services/Soap/u/${version}`, {
+    method: "POST",
+    headers: { "Content-Type": "text/xml; charset=UTF-8", SOAPAction: "login" },
+    body: envelope,
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  const body = await res.text();
+
+  if (!res.ok) {
+    // The fault string is the entire diagnosis: a wrong token, a locked-out
+    // user, an IP the profile won't accept. Never paraphrase it.
+    const fault = /<faultstring>([\s\S]*?)<\/faultstring>/.exec(body)?.[1];
+    throw new Error(`SOAP login failed (${res.status}): ${fault ?? body.slice(0, 300)}`);
+  }
+
+  const sessionId = /<sessionId>([\s\S]*?)<\/sessionId>/.exec(body)?.[1];
+  const serverUrl = /<serverUrl>([\s\S]*?)<\/serverUrl>/.exec(body)?.[1];
+  if (!sessionId || !serverUrl) {
+    throw new Error("SOAP login returned no session — check the username and security token");
+  }
+
+  // serverUrl points at the Soap endpoint on the org's own host; everything
+  // downstream wants just the origin.
+  return { token: sessionId, instanceUrl: new URL(serverUrl).origin };
 }
 
 function base64url(input: Buffer | string): string {
@@ -74,6 +151,8 @@ function base64url(input: Buffer | string): string {
  * does. One less dependency in the path that holds a private key.
  */
 async function accessToken(cfg: CrmConfig): Promise<{ token: string; instanceUrl: string }> {
+  if (cfg.kind === "soap") return soapLogin(cfg);
+
   const claims = {
     iss: cfg.clientId,
     sub: cfg.username,
@@ -129,6 +208,8 @@ export interface PushResult {
   reason?: string;
   leadId?: string;
   created?: boolean;
+  /** Which credential path ran — the interim one should not go unnoticed. */
+  auth?: "jwt" | "soap";
 }
 
 export async function pushLeadToCrm(scanId: string, opts: { strict?: boolean } = {}): Promise<PushResult> {
@@ -136,7 +217,10 @@ export async function pushLeadToCrm(scanId: string, opts: { strict?: boolean } =
   const cfg = config();
   if (!cfg) {
     if (strict) {
-      throw new Error("SF_CRM_CLIENT_ID, SF_CRM_USERNAME and SF_CRM_PRIVATE_KEY must all be set");
+      throw new Error(
+        "Set SF_CRM_USERNAME plus either SF_CRM_CLIENT_ID + SF_CRM_PRIVATE_KEY (JWT), " +
+          "or SF_CRM_PASSWORD + SF_CRM_SECURITY_TOKEN (SOAP login)",
+      );
     }
     return { pushed: false, reason: "not configured" };
   }
@@ -223,7 +307,7 @@ export async function pushLeadToCrm(scanId: string, opts: { strict?: boolean } =
     leadId = body?.id;
   }
 
-  return { pushed: true, leadId, created };
+  return { pushed: true, leadId, created, auth: cfg.kind };
 }
 
 function skip(reason: string, strict: boolean): PushResult {
