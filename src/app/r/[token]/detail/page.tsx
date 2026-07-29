@@ -109,6 +109,10 @@ export default async function DetailPage({
     return `/r/${scan.token}/detail${qs ? `?${qs}` : ""}`;
   };
 
+  // Setup deep links are built against the connected org's own domain — every
+  // scan is a different org, so there is nothing to hardcode.
+  const setup = scan.instance_url.replace(/\/+$/, "");
+
   return (
     <Shell
       token={scan.token}
@@ -226,6 +230,7 @@ export default async function DetailPage({
                 key={`${row.object_name}.${row.field_api_name}`}
                 row={row}
                 token={scan.token}
+                setup={setup}
                 depsSettled={depsSettled}
               />
             ))}
@@ -245,12 +250,22 @@ export default async function DetailPage({
 function FieldRow({
   row,
   token,
+  setup,
   depsSettled,
 }: {
   row: CensusRow;
   token: string;
+  setup: string;
   depsSettled: boolean;
 }) {
+  // Standard fields carry their API name as the id, custom fields their durable
+  // id — Object Manager accepts both in this position. Null only when the
+  // Tooling lookup and the DurableId fallback both came up empty, in which case
+  // a link would 404, so the label stays plain text.
+  const setupUrl = row.field_id
+    ? `${setup}/lightning/setup/ObjectManager/${row.object_name}/FieldsAndRelationships/${row.field_id}/view`
+    : null;
+
   return (
     <tr>
       <td style={{ whiteSpace: "nowrap" }}>
@@ -266,7 +281,21 @@ function FieldRow({
           </>
         )}
       </td>
-      <td style={{ fontSize: "0.78rem" }}>{row.field_label ?? "—"}</td>
+      <td style={{ fontSize: "0.78rem" }}>
+        {setupUrl ? (
+          <a
+            className="ref-link"
+            href={setupUrl}
+            target="_blank"
+            rel="noreferrer"
+            title={`Open ${row.field_api_name} in Salesforce Setup`}
+          >
+            {row.field_label ?? row.field_api_name}
+          </a>
+        ) : (
+          (row.field_label ?? "—")
+        )}
+      </td>
       <td>
         <span className="type-badge">{row.sf_type ?? "—"}</span>
       </td>
