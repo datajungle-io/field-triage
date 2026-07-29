@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import type { PhaseProgress } from "@/lib/scan/progress";
+import type { MeasurementCoverage } from "@/lib/report/data";
+import { referenceCoverage } from "@/lib/report/coverage";
 
 /**
  * Discloses which reference sources didn't fully scan.
@@ -30,19 +32,19 @@ const HINTS: Record<string, string> = {
   reports: "Reports in folders the connecting user can't open return a permission error.",
 };
 
-/**
- * Above this share of components read, the gap is a footnote rather than a
- * warning: it starts collapsed. A source that failed outright is never treated
- * as high coverage, however few components it had.
- */
-const HIGH_COVERAGE = 0.95;
 
 export function CoverageBanner({
   phases,
   token,
+  measurement,
 }: {
   phases: PhaseProgress[];
   token: string;
+  /**
+   * Fields the scan couldn't read. Optional so the drill pages, which are
+   * about references rather than population, can omit it.
+   */
+  measurement?: MeasurementCoverage;
 }) {
   const gaps = phases.filter(
     (p) =>
@@ -50,11 +52,22 @@ export function CoverageBanner({
       (p.status === "failed" || p.status === "skipped" || p.failed > 0),
   );
 
-  const anySourceLost = gaps.some((g) => g.status === "failed" || g.status === "skipped");
+  // Same materiality rule the KPI tiles use, so the banner can't start
+  // collapsed while a tile is shouting about the very same gap.
+  const ref = referenceCoverage(phases);
   const totalComponents = gaps.reduce((sum, g) => sum + g.total, 0);
   const totalFailed = gaps.reduce((sum, g) => sum + g.failed, 0);
-  const coverage = totalComponents > 0 ? 1 - totalFailed / totalComponents : 0;
-  const minor = !anySourceLost && coverage >= HIGH_COVERAGE;
+
+  // Fields we couldn't see at all. Reported alongside unreadable references
+  // because both end in the same place — a number that looks like an answer but
+  // is really an absence.
+  const hidden = measurement?.notVisible ?? 0;
+  const hiddenShare = measurement?.hiddenShare ?? 0;
+
+  // Hidden fields are never "minor". A reference gap weakens one column; a
+  // field the scan never saw is missing from every number on the page,
+  // including the headline candidate count.
+  const minor = !ref.material && hidden === 0;
 
   const storageKey = `ft:coverage-dismissed:${token}`;
   // Starts expanded for a material gap, collapsed for a trivial one; the stored
@@ -69,7 +82,7 @@ export function CoverageBanner({
     }
   }, [storageKey]);
 
-  if (gaps.length === 0) return null;
+  if (gaps.length === 0 && hidden === 0) return null;
 
   if (collapsed) {
     return (
@@ -78,9 +91,11 @@ export function CoverageBanner({
         style={{ margin: "0.75rem 0", display: "block", lineHeight: 1.6 }}
       >
         <span style={{ color: "#F5B731" }}>⚠</span>{" "}
-        {totalFailed > 0 && totalComponents > 0
-          ? `Partial dependency coverage — ${(totalComponents - totalFailed).toLocaleString("en-US")} of ${totalComponents.toLocaleString("en-US")} components read.`
-          : "Some dependency sources were unavailable."}{" "}
+        {hidden > 0
+          ? `${hidden.toLocaleString("en-US")} custom field${hidden === 1 ? "" : "s"} couldn't be read.`
+          : totalFailed > 0 && totalComponents > 0
+            ? `Partial dependency coverage — ${(totalComponents - totalFailed).toLocaleString("en-US")} of ${totalComponents.toLocaleString("en-US")} components read.`
+            : "Some dependency sources were unavailable."}{" "}
         <button
           type="button"
           onClick={() => setCollapsed(false)}
@@ -104,10 +119,41 @@ export function CoverageBanner({
     <div className="coverage-banner" style={{ position: "relative" }}>
       <span aria-hidden="true">⚠</span>
       <div style={{ flex: 1, paddingRight: "1.5rem" }}>
-        <strong>Dependency counts below may be incomplete.</strong>
-        Some references couldn&apos;t be read, so a field showing zero dependencies might
-        still be in use. Treat those as unverified rather than safe.
+        {/* Hidden fields lead when present. A reference gap qualifies one
+            column; fields the scan never saw are missing from every number
+            here, so the reader needs that first. */}
+        {hidden > 0 ? (
+          <>
+            <strong>
+              {hidden.toLocaleString("en-US")} custom field
+              {hidden === 1 ? "" : "s"} couldn&apos;t be read
+              {measurement && measurement.customFields > 0
+                ? ` — ${Math.round(hiddenShare * 100)}% of the custom fields on these objects.`
+                : "."}
+            </strong>
+            Salesforce didn&apos;t return {hidden === 1 ? "it" : "them"} when describing the
+            object, which usually means field-level security is hiding{" "}
+            {hidden === 1 ? "it" : "them"} from the account you connected with.{" "}
+            {hidden === 1 ? "It has" : "They have"} no population figure, so{" "}
+            {hidden === 1 ? "it" : "they"} cannot appear as{" "}
+            {hidden === 1 ? "a deletion candidate" : "deletion candidates"} —{" "}
+            <strong>the counts below are a floor, not a total.</strong> Re-run with a
+            System Administrator to see the whole picture.
+          </>
+        ) : (
+          <>
+            <strong>Dependency counts below may be incomplete.</strong>
+            Some references couldn&apos;t be read, so a field showing zero dependencies
+            might still be in use. Treat those as unverified rather than safe.
+          </>
+        )}
         <ul>
+          {hidden > 0 && gaps.length > 0 && (
+            <li>
+              <strong>Dependencies</strong> — some references couldn&apos;t be read either, so
+              a field showing zero dependencies might still be in use:
+            </li>
+          )}
           {gaps.map((gap) => (
             <li key={gap.phase}>
               <strong>{SOURCE_LABELS[gap.phase]}</strong>

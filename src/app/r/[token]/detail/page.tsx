@@ -7,7 +7,7 @@ import { ScanDriver } from "@/components/ScanDriver";
 import { scanByToken } from "@/lib/scan/access";
 import { loadProgress } from "@/lib/scan/progress";
 import { loadByObject, loadCensus, type CensusRow } from "@/lib/report/data";
-import { REFERENCE_PHASES } from "@/lib/constants";
+import { referenceCoverage } from "@/lib/report/coverage";
 
 export const dynamic = "force-dynamic";
 
@@ -86,9 +86,12 @@ export default async function DetailPage({
     ? 0
     : allRows.filter((r) => r.bucket === "No Data" && (showStandard || r.is_custom)).length;
 
-  const depsSettled = progress.phases
-    .filter((p) => REFERENCE_PHASES.includes(p.phase))
-    .every((p) => p.status === "complete" || p.status === "failed" || p.status === "skipped");
+  // Settled means the sweeps stopped, not that they succeeded. When the gap is
+  // material, "0 dependencies" means "nothing we could read points at this" —
+  // a weaker claim, and the verdict column says so.
+  const refCoverage = referenceCoverage(progress.phases);
+  const depsSettled = refCoverage.settled;
+  const referencesComplete = !refCoverage.material;
 
   const query = (next: Partial<SearchParams>) => {
     const merged = {
@@ -232,6 +235,7 @@ export default async function DetailPage({
                 token={scan.token}
                 setup={setup}
                 depsSettled={depsSettled}
+                referencesComplete={referencesComplete}
               />
             ))}
           </tbody>
@@ -252,11 +256,13 @@ function FieldRow({
   token,
   setup,
   depsSettled,
+  referencesComplete,
 }: {
   row: CensusRow;
   token: string;
   setup: string;
   depsSettled: boolean;
+  referencesComplete: boolean;
 }) {
   // Standard fields carry their API name as the id, custom fields their durable
   // id — Object Manager accepts both in this position. Null only when the
@@ -343,7 +349,16 @@ function FieldRow({
       </td>
       <td className="health-cell">
         {row.is_safe_to_delete && row.dependency_count === 0 ? (
-          <span className="ready-pill">Ready · 0 deps</span>
+          referencesComplete ? (
+            <span className="ready-pill">Ready · 0 deps</span>
+          ) : (
+            // Zero readable references, not zero references. The pill keeps the
+            // shape so the column still scans, but drops the word that promised
+            // more than the scan verified.
+            <span className="ready-pill ready-pill-unverified" title="No references found, but some reference sources could not be fully read — verify in Setup before deleting.">
+              0 deps · unverified
+            </span>
+          )
         ) : row.is_safe_to_delete ? (
           <span className="val-ready" style={{ fontSize: "0.72rem" }}>
             Review deps

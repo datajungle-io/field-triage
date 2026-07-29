@@ -7,8 +7,9 @@ import { ScanDriver } from "@/components/ScanDriver";
 import { ScanStatusStrip } from "@/components/ScanStatusStrip";
 import { scanByToken } from "@/lib/scan/access";
 import { loadProgress } from "@/lib/scan/progress";
-import { loadByObject, loadSummary } from "@/lib/report/data";
-import { OBJECTS, REFERENCE_PHASES } from "@/lib/constants";
+import { loadByObject, loadMeasurementCoverage, loadSummary } from "@/lib/report/data";
+import { OBJECTS } from "@/lib/constants";
+import { referenceCoverage } from "@/lib/report/coverage";
 
 export const dynamic = "force-dynamic";
 
@@ -53,18 +54,23 @@ export default async function FieldTriagePage({
   const scan = await scanByToken(params.token);
   if (!scan) notFound();
 
-  const [summary, byObject, progress] = await Promise.all([
+  const [summary, byObject, progress, measurement] = await Promise.all([
     loadSummary(scan.id),
     loadByObject(scan.id),
     loadProgress(scan.id),
+    loadMeasurementCoverage(scan.id),
   ]);
 
   // Dependency-derived numbers keep refining until every reference source has
   // settled. Until then they are shown as pending rather than as final — a
   // count that is about to fall is not the same as a count that has landed.
-  const depsSettled = progress.phases
-    .filter((p) => REFERENCE_PHASES.includes(p.phase))
-    .every((p) => p.status === "complete" || p.status === "failed" || p.status === "skipped");
+  // Settled is not the same as complete. A source that failed outright, or a
+  // sweep that couldn't open 291 of 2,038 report folders, still "settles" — and
+  // a field then shows zero references because nothing readable pointed at it,
+  // not because nothing does. That distinction is the whole basis for telling
+  // someone a field is safe to remove.
+  const refCoverage = referenceCoverage(progress.phases);
+  const depsSettled = refCoverage.settled;
 
   // The report is about custom fields, so an object with none has no row worth
   // reading — standard fields can't be deleted whatever their health. Listing
@@ -122,7 +128,7 @@ export default async function FieldTriagePage({
 
       <ScanStatusStrip token={scan.token} initialProgress={progress} />
 
-      <CoverageBanner phases={progress.phases} token={scan.token} />
+      <CoverageBanner phases={progress.phases} token={scan.token} measurement={measurement} />
 
       <div className="kpi-tiles">
         <div className="kpi-tile">
@@ -142,7 +148,19 @@ export default async function FieldTriagePage({
               that removing it is safe. Claiming otherwise to an admin who may
               act on it in production is a promise the scan cannot keep. */}
           <div className="tile-label">Deletion Candidates</div>
-          <div className="tile-sub">&lt;1% populated · unchanged 90+ days</div>
+          {/* A zero because the org is clean and a zero because the scan was
+              blocked are the same number, and only one is good news. When
+              fields were hidden, the tile says so rather than presenting an
+              absence as a finding. */}
+          {measurement.notVisible > 0 ? (
+            <div className="tile-sub tile-sub-warn">
+              ⚠ {fmt(measurement.notVisible)} field
+              {measurement.notVisible === 1 ? "" : "s"} couldn&apos;t be read — this is a
+              floor, not a total
+            </div>
+          ) : (
+            <div className="tile-sub">&lt;1% populated · unchanged 90+ days</div>
+          )}
         </Link>
 
         <Link
@@ -152,7 +170,13 @@ export default async function FieldTriagePage({
           <div className="tile-value">{fmt(summary.ready_no_deps)}</div>
           <div className="tile-label">Candidates · No Dependencies</div>
           {depsSettled ? (
-            <div className="tile-sub">zero references anywhere · start here</div>
+            !refCoverage.material ? (
+              <div className="tile-sub">zero references anywhere · start here</div>
+            ) : (
+              <div className="tile-sub tile-sub-warn">
+                ⚠ no references <em>we could read</em> — verify before deleting
+              </div>
+            )
           ) : (
             <div className="pending-chip">
               <span className="pending-dot" /> still scanning

@@ -86,6 +86,48 @@ export async function loadByObject(scanId: string): Promise<ObjectRow[]> {
   return (data ?? []) as ObjectRow[];
 }
 
+/**
+ * How much of the org the scan could actually *measure*, as opposed to
+ * cross-reference.
+ *
+ * These are different failures with the same symptom. The coverage banner
+ * already discloses references we couldn't read; this covers fields we couldn't
+ * read at all. A field hidden by field-level security has no population figure,
+ * so it can never qualify as a deletion candidate — meaning an org that blocked
+ * half the scan produces a low candidate count and a clean-looking report.
+ *
+ * Only `not_visible` is a coverage problem. `not_aggregatable` (compound and
+ * long-text fields Salesforce won't COUNT) and `no_records` (an empty object)
+ * are facts about the data, not gaps in the scan, and inflating the warning
+ * with them would train people to ignore it.
+ */
+export interface MeasurementCoverage {
+  customFields: number;
+  /** Absent from the describe — almost always field-level security. */
+  notVisible: number;
+  /** Salesforce won't aggregate the type. Expected, not a gap. */
+  notAggregatable: number;
+  /** The object has no rows at all. */
+  noRecords: number;
+  /** notVisible as a share of custom fields, 0–1. */
+  hiddenShare: number;
+}
+
+export async function loadMeasurementCoverage(scanId: string): Promise<MeasurementCoverage> {
+  const rows = await loadCensus(scanId, { customOnly: true, includeNoData: true });
+
+  const count = (reason: string) => rows.filter((r) => r.no_data_reason === reason).length;
+  const notVisible = count("not_visible");
+
+  return {
+    customFields: rows.length,
+    notVisible,
+    notAggregatable: count("not_aggregatable"),
+    noRecords: count("no_records"),
+    hiddenShare: rows.length > 0 ? notVisible / rows.length : 0,
+  };
+}
+
 export interface CensusFilter {
   object?: string;
   safeOnly?: boolean;

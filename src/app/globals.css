@@ -741,6 +741,13 @@ body {
   color: hsl(var(--base-content) / 0.5);
 }
 
+/* Amber, matching the coverage banner's ⚠. Used when a tile's number is a
+   floor rather than a total — it has to outrank the muted default, because the
+   caveat is the point and a grey one reads as boilerplate. */
+.tile-sub-warn {
+  color: #f5b731;
+}
+
 .tile-red .tile-value {
   color: #f07070;
 }
@@ -1101,6 +1108,15 @@ body {
   font-size: 0.72rem;
   font-weight: 600;
   color: #b5d333;
+}
+
+/* Same pill, amber instead of lime, with a dotted underline signalling the
+   tooltip. Lime is the "act on this" colour throughout the report; a field
+   whose references were only partly readable hasn't earned it. */
+.ready-pill-unverified {
+  color: #f5b731;
+  border-bottom: 1px dotted currentColor;
+  cursor: help;
 }
 
 /* ---------------------------------------------------------------------------
