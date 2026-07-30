@@ -272,12 +272,12 @@ export default function SecurityPage() {
                     <strong style={strong}>Read the source.</strong> The whole thing is
                     public:{" "}
                     <a
-                      href="https://github.com/datajungle-io/field-triage"
+                      href="https://github.com/datajungle-io/field-triage-oss"
                       target="_blank"
                       rel="noreferrer"
                       style={{ color: "#9dd31a" }}
                     >
-                      github.com/datajungle-io/field-triage
+                      github.com/datajungle-io/field-triage-oss
                     </a>
                     . The database schema is in <code>supabase/migrations/</code> — every
                     column we persist, so &ldquo;we store counts, not values&rdquo; is

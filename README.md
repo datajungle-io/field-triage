@@ -1,5 +1,33 @@
 # Field Triage — free Salesforce lead magnet
 
+> ### ⚠️ This repo is mirrored publicly — keep them in sync
+>
+> | | |
+> |---|---|
+> | **Private** (this one) | `datajungle-io/field-triage` — Netlify builds from here |
+> | **Public** | [`datajungle-io/field-triage-oss`](https://github.com/datajungle-io/field-triage-oss) — linked from [/security](https://triage.datajungle.io/security) |
+>
+> **`git push origin main` already pushes to both.** `origin` has two push URLs
+> configured, so the ordinary command mirrors automatically and there is nothing
+> extra to remember.
+>
+> The one thing that matters: **never let them diverge.** The security page tells
+> sceptical admins to read the public source before granting OAuth access. If the
+> deployed site ever does something the published code doesn't show, that
+> discrepancy is far more damaging than never open-sourcing it would have been.
+>
+> If you ever push with `--force`, or push a branch by URL, check both remotes
+> afterwards:
+>
+> ```bash
+> git remote -v | grep push        # expect two push URLs
+> git ls-remote https://github.com/datajungle-io/field-triage-oss.git main
+> ```
+>
+> Client names are scrubbed from this history (see the commit that removed them).
+> Keep it that way — no real org names, instance URLs or org statistics in commit
+> messages or code comments, because every commit here reaches the public mirror.
+
 A Salesforce admin OAuths their org, watches a live metadata scan, and lands on what looks
 like their own instance of Data Jungle: the same sidebar, KPI tiles, By Object table and
 health bars as the Field Triage page in `canopy-data-jungle`. The report is real,
