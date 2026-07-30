@@ -55,7 +55,13 @@ const NOT_STORED: Array<[string, string]> = [
   ],
 ];
 
+const REPO = "https://github.com/datajungle-io/field-triage-oss";
+
 export default function SecurityPage() {
+  // Baked in at build time from Netlify's COMMIT_REF. See next.config.mjs.
+  const commit = process.env.NEXT_PUBLIC_COMMIT_REF ?? "";
+  const shortCommit = commit ? commit.slice(0, 7) : null;
+
   return (
     <div className="marketing">
       <div className="mk-nav-wrap mk-pad">
@@ -295,6 +301,67 @@ export default function SecurityPage() {
                 </li>
               </ul>
             </div>
+          </section>
+
+          {/* The fair objection to "read the source" is that published code and
+              deployed code need not be the same thing. This is the answer that
+              doesn't require trusting us — and its limits are stated, because
+              overclaiming here would undo the point of the page. */}
+          <section style={sectionStyle}>
+            <h2 className="mk-h2" style={{ fontSize: 24 }}>
+              &ldquo;How do I know the deployed site runs that code?&rdquo;
+            </h2>
+            <p className="mk-body">
+              The right question, and the honest answer is that publishing source proves
+              nothing on its own. So this build states which commit it came from:
+            </p>
+
+            <div
+              style={{
+                margin: "1rem 0",
+                padding: "0.9rem 1.2rem",
+                borderRadius: 10,
+                border: "1px solid #252b34",
+                background: "#151a21",
+                fontFamily: "var(--font-mono)",
+                fontSize: 14,
+                color: "#e8eaed",
+                wordBreak: "break-all",
+              }}
+            >
+              {shortCommit ? (
+                <a
+                  href={`${REPO}/commit/${commit}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: "#9dd31a", textDecoration: "none" }}
+                >
+                  {commit}
+                </a>
+              ) : (
+                <span style={{ color: "#9ea3ab" }}>
+                  (running locally — no build commit)
+                </span>
+              )}
+            </div>
+
+            <p className="mk-body">
+              That hash is baked into the JavaScript this page served you, so you can read
+              it out of the bundle rather than take it from this paragraph. Look it up in{" "}
+              <a href={REPO} target="_blank" rel="noreferrer" style={{ color: "#9dd31a" }}>
+                the public repo
+              </a>
+              . If it isn&apos;t there, every claim on this page is worthless and you should
+              say so loudly.
+            </p>
+            <p className="mk-body" style={{ marginTop: "0.9rem" }}>
+              What this does <em>not</em> prove: that the build pipeline wasn&apos;t
+              tampered with between that commit and this deploy. No project can prove that
+              to you from the outside — a fully public repo deploying through CI you
+              can&apos;t inspect has exactly the same gap. What it does is make the claim
+              falsifiable and pin it to a specific, checkable artefact, which is a much
+              better position than asking you to believe a marketing page.
+            </p>
           </section>
 
           <section style={{ ...sectionStyle, borderBottom: "none" }}>

@@ -1,32 +1,34 @@
 # Field Triage — free Salesforce lead magnet
 
-> ### ⚠️ This repo is mirrored publicly — keep them in sync
+> ### This repository is mirrored, and both copies are identical
 >
-> | | |
-> |---|---|
-> | **Private** (this one) | `datajungle-io/field-triage` — Netlify builds from here |
-> | **Public** | [`datajungle-io/field-triage-oss`](https://github.com/datajungle-io/field-triage-oss) — linked from [/security](https://triage.datajungle.io/security) |
+> The code lives in two places that receive the **same commits at the same time**:
+> `origin` is configured with two push URLs, so one `git push` writes to both. They
+> are not a public copy and a private original — they are the same history, and any
+> commit in one is in the other.
 >
-> **`git push origin main` already pushes to both.** `origin` has two push URLs
-> configured, so the ordinary command mirrors automatically and there is nothing
-> extra to remember.
+> - **Public:** [`datajungle-io/field-triage-oss`](https://github.com/datajungle-io/field-triage-oss)
+> - **Deploy source:** a private repository, because Netlify's build hook is
+>   attached to it and moving that would break continuous deployment for no gain.
 >
-> The one thing that matters: **never let them diverge.** The security page tells
-> sceptical admins to read the public source before granting OAuth access. If the
-> deployed site ever does something the published code doesn't show, that
-> discrepancy is far more damaging than never open-sourcing it would have been.
+> **You do not have to take that on trust.** Every deploy publishes the commit hash
+> it was built from at [triage.datajungle.io/security](https://triage.datajungle.io/security),
+> and the hash is baked into the JavaScript the site serves. Look it up here. If a
+> deployed hash is ever missing from this repository's history, the two have
+> diverged and you should say so publicly — that is exactly the check this is here
+> to enable.
 >
-> If you ever push with `--force`, or push a branch by URL, check both remotes
-> afterwards:
+> Verify the two are in step at any time:
 >
 > ```bash
-> git remote -v | grep push        # expect two push URLs
 > git ls-remote https://github.com/datajungle-io/field-triage-oss.git main
+> # compare against the commit shown on /security
 > ```
 >
-> Client names are scrubbed from this history (see the commit that removed them).
-> Keep it that way — no real org names, instance URLs or org statistics in commit
-> messages or code comments, because every commit here reaches the public mirror.
+> <sub>**Maintainer note.** Never let them diverge — `git push origin main` handles
+> it, but check both remotes after any `--force` or push-by-URL. And keep client
+> names, instance URLs and org statistics out of commit messages and comments:
+> every commit here is public the moment it is written.</sub>
 
 A Salesforce admin OAuths their org, watches a live metadata scan, and lands on what looks
 like their own instance of Data Jungle: the same sidebar, KPI tiles, By Object table and
