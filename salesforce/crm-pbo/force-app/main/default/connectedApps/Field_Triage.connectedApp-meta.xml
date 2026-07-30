@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The inbound Connected App — the one a stranger sees on the consent screen when
+  they authorise a scan. Distinct from Field_Triage_CRM_Writer, which is
+  outbound and writes leads into this same org.
+
+  Hosted here, in the Partner Business Org, rather than in the orgfarm Developer
+  Edition it started in. The consumer key is baked into the deployed app, so if
+  the host org is ever reclaimed every OAuth attempt fails and the funnel stops
+  at the front door. A dev org is the wrong permanent home for the credential a
+  public tool depends on.
+
+  Scope policy, which is the trust story of the whole product:
+    Api   — required. Salesforce has no metadata-read-only scope, so this is the
+            narrowest grant that can read FieldDefinition and run COUNT queries.
+    Basic — the identity URL service (id, profile, email). This is the lead
+            capture; there is no form anywhere in the product.
+
+  RefreshToken is deliberately absent, and it is the single most verifiable
+  claim the product makes: a prospect can confirm it on Salesforce's own consent
+  screen before granting anything, because the screen will not list "Perform
+  requests at any time". It also made this migration free — with no refresh
+  tokens issued, no existing authorisation broke when the consumer key changed.
+-->
+<ConnectedApp xmlns="http://soap.sforce.com/2006/04/metadata">
+    <contactEmail>brendan@datajungle.io</contactEmail>
+    <description>Free Salesforce field audit by Data Jungle. Reads field metadata and aggregate record counts only — never field values — and writes nothing.</description>
+    <label>Data Jungle Field Triage</label>
+    <oauthConfig>
+        <!-- Newline-separated. Localhost is permitted by Salesforce and is what
+             makes local end-to-end testing of this flow possible. 3100 is the
+             port the dev server actually runs on. -->
+        <callbackUrl>https://triage.datajungle.io/api/auth/callback
+http://localhost:3000/api/auth/callback
+http://localhost:3100/api/auth/callback
+http://localhost:3111/api/auth/callback</callbackUrl>
+        <!-- False so any admin in any org can authorise. Pre-authorisation would
+             restrict this to users in *this* org, which is the opposite of what
+             a cross-org tool needs. -->
+        <isAdminApproved>false</isAdminApproved>
+        <isIntrospectAllTokens>false</isIntrospectAllTokens>
+        <!-- "Require Secret for Web Server Flow" off, so the app can be set up
+             end to end without a UI trip for the consumer secret. Safe only
+             because PKCE below is mandatory — together they are the standard
+             public-client configuration. -->
+        <isConsumerSecretOptional>true</isConsumerSecretOptional>
+        <isPkceRequired>true</isPkceRequired>
+        <scopes>Api</scopes>
+        <scopes>Basic</scopes>
+    </oauthConfig>
+</ConnectedApp>
