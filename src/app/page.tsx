@@ -95,8 +95,13 @@ export default function HomePage({
                 <strong style={{ color: "#e8eaed", fontWeight: 600 }}>
                   Lead, Account, Contact and Opportunity
                 </strong>{" "}
-                — how populated each one is, when it was last touched, and what still
-                references it. In about three minutes.
+                {/* "last edited in Setup", not "last touched". The date comes from
+                    FieldDefinition.LastModifiedDate — when the field's *definition*
+                    changed, not when a record last had a value written to it. A
+                    field written to daily still shows an old date if nobody has
+                    edited its label, type or help text. */}
+                — how populated each one is, when it was last edited in Setup, and what
+                still references it. In about three minutes.
               </p>
 
               {error && (

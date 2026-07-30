@@ -90,7 +90,7 @@ export function reportEmailHtml(d: ReportEmailData): string {
     d.deleteReady && d.deleteReady > 0
       ? `We scanned <strong style="color:${TEXT};">${fmt(d.fieldsScanned)} fields</strong> across Lead, Account,
          Contact and Opportunity. <strong style="color:${TEXT};">${fmt(d.deleteReady)}</strong> look like
-         deletion candidates — under 1% populated and untouched for 90&nbsp;days or more.`
+         deletion candidates — under 1% populated, and unedited in Setup for 90&nbsp;days or more.`
       : `We scanned <strong style="color:${TEXT};">${fmt(d.fieldsScanned)} fields</strong> across Lead, Account,
          Contact and Opportunity and found nothing obviously abandoned. That is a good result — your
          custom fields are being used.`;
@@ -271,8 +271,8 @@ export function reportEmailText(d: ReportEmailData): string {
     "",
     `We scanned ${fmt(d.fieldsScanned)} fields across Lead, Account, Contact and Opportunity.`,
     d.deleteReady === 1
-      ? "1 is a deletion candidate — under 1% populated and untouched for 90+ days."
-      : `${fmt(d.deleteReady)} are deletion candidates — under 1% populated and untouched for 90+ days.`,
+      ? "1 is a deletion candidate — under 1% populated, unedited in Setup for 90+ days."
+      : `${fmt(d.deleteReady)} are deletion candidates — under 1% populated, unedited in Setup for 90+ days.`,
     d.readyNoDeps && d.readyNoDeps > 0
       ? `${fmt(d.readyNoDeps)} of those ${d.readyNoDeps === 1 ? "has" : "have"} zero references ` +
         "anywhere in Salesforce. Start there — nothing has to be untangled first."
