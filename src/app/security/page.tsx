@@ -55,7 +55,7 @@ const NOT_STORED: Array<[string, string]> = [
   ],
 ];
 
-const REPO = "https://github.com/datajungle-io/field-triage-oss";
+const REPO = "https://github.com/datajungle-io/field-triage";
 
 export default function SecurityPage() {
   // Baked in at build time from Netlify's COMMIT_REF. See next.config.mjs.
@@ -278,12 +278,12 @@ export default function SecurityPage() {
                     <strong style={strong}>Read the source.</strong> The whole thing is
                     public:{" "}
                     <a
-                      href="https://github.com/datajungle-io/field-triage-oss"
+                      href="https://github.com/datajungle-io/field-triage"
                       target="_blank"
                       rel="noreferrer"
                       style={{ color: "#9dd31a" }}
                     >
-                      github.com/datajungle-io/field-triage-oss
+                      github.com/datajungle-io/field-triage
                     </a>
                     . The database schema is in <code>supabase/migrations/</code> — every
                     column we persist, so &ldquo;we store counts, not values&rdquo; is

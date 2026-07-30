@@ -1,34 +1,13 @@
 # Field Triage — free Salesforce lead magnet
 
-> ### This repository is mirrored, and both copies are identical
+> **This is the repository the live site is built from.** Netlify deploys
+> [triage.datajungle.io](https://triage.datajungle.io) from `main`, and every build
+> publishes the commit hash it came from at
+> [/security](https://triage.datajungle.io/security) — so you can check that the
+> deployed site is running the code you're reading, rather than take it on trust.
 >
-> The code lives in two places that receive the **same commits at the same time**:
-> `origin` is configured with two push URLs, so one `git push` writes to both. They
-> are not a public copy and a private original — they are the same history, and any
-> commit in one is in the other.
->
-> - **Public:** [`datajungle-io/field-triage-oss`](https://github.com/datajungle-io/field-triage-oss)
-> - **Deploy source:** a private repository, because Netlify's build hook is
->   attached to it and moving that would break continuous deployment for no gain.
->
-> **You do not have to take that on trust.** Every deploy publishes the commit hash
-> it was built from at [triage.datajungle.io/security](https://triage.datajungle.io/security),
-> and the hash is baked into the JavaScript the site serves. Look it up here. If a
-> deployed hash is ever missing from this repository's history, the two have
-> diverged and you should say so publicly — that is exactly the check this is here
-> to enable.
->
-> Verify the two are in step at any time:
->
-> ```bash
-> git ls-remote https://github.com/datajungle-io/field-triage-oss.git main
-> # compare against the commit shown on /security
-> ```
->
-> <sub>**Maintainer note.** Never let them diverge — `git push origin main` handles
-> it, but check both remotes after any `--force` or push-by-URL. And keep client
-> names, instance URLs and org statistics out of commit messages and comments:
-> every commit here is public the moment it is written.</sub>
+> <sub>**Maintainer note.** This repo is public: keep client names, instance URLs and
+> org statistics out of commit messages and code comments.</sub>
 
 A Salesforce admin OAuths their org, watches a live metadata scan, and lands on what looks
 like their own instance of Data Jungle: the same sidebar, KPI tiles, By Object table and
