@@ -15,5 +15,5 @@
         <scopes>Api</scopes>
         <scopes>RefreshToken</scopes>
     </oauthConfig>
-    <permissionSetName>Field_Triage_CRM_Writer</permissionSetName>
+    <permissionSetName>Field Triage CRM Writer</permissionSetName>
 </ConnectedApp>
