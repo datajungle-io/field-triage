@@ -143,11 +143,11 @@ export default function HomePage({
                   {[
                     ["822", "Fields scanned", ""],
                     ["149", "Deletion candidates", "tile-red"],
-                    // Kept plausible on purpose. 34 came from an early a large org
-                    // scan taken before dependency detection was fixed, when
-                    // that org read as having almost no references at all. Real
-                    // orgs land in single digits, so a high number here would
-                    // set an expectation the report then undercuts.
+                    // Kept plausible on purpose. 34 came from an early scan of a
+                    // large org, taken before dependency detection was fixed,
+                    // when that org read as having almost no references at all.
+                    // Real orgs land in single digits, so a high number here
+                    // would set an expectation the report then undercuts.
                     ["8", "No dependencies", "tile-lime"],
                   ].map(([n, label, cls]) => (
                     <div key={label} className={`mk-preview-tile ${cls}`}>

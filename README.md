@@ -280,7 +280,7 @@ open 'http://localhost:3000/api/dev/scan?org=admin-user'
 ```
 
 You'll land on the live scan screen, then the report once population finishes. Try
-`?org=<alias>` for a large real org — that's the one that will actually stress the report
+Point `?org=` at a large real org — that's the one that will actually stress the report
 sweep and the ReportType retrieve.
 
 > Scans started this way are flagged `is_cli_session`, so finalize skips revocation. Without

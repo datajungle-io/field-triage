@@ -269,6 +269,26 @@ export default function SecurityPage() {
                 <li style={itemStyle}>
                   <span style={{ color: "#9dd31a", flex: "none" }}>4</span>
                   <span style={{ color: "#9ea3ab" }}>
+                    <strong style={strong}>Read the source.</strong> The whole thing is
+                    public:{" "}
+                    <a
+                      href="https://github.com/datajungle-io/field-triage"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ color: "#9dd31a" }}
+                    >
+                      github.com/datajungle-io/field-triage
+                    </a>
+                    . The database schema is in <code>supabase/migrations/</code> — every
+                    column we persist, so &ldquo;we store counts, not values&rdquo; is
+                    something you can check rather than accept. Token revocation is in{" "}
+                    <code>src/lib/scan/phases/finalize.ts</code>, and the OAuth scopes are in{" "}
+                    <code>salesforce/</code>.
+                  </span>
+                </li>
+                <li style={itemStyle}>
+                  <span style={{ color: "#9dd31a", flex: "none" }}>5</span>
+                  <span style={{ color: "#9ea3ab" }}>
                     <strong style={strong}>Scan a sandbox first.</strong> Entirely
                     reasonable, and it works the same way.
                   </span>

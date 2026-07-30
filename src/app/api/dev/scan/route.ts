@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
   const org = request.nextUrl.searchParams.get("org");
   if (!org || !/^[\w.@-]+$/.test(org)) {
     return NextResponse.json(
-      { error: "Pass ?org=<alias or username>, e.g. ?org=<alias>" },
+      { error: "Pass ?org=<alias or username>, as shown by `sf org list`." },
       { status: 400 },
     );
   }
