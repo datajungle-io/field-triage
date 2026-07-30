@@ -95,6 +95,19 @@ html {
   z-index: 50;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
+  /* The pill has its own translucent background, but the wrapper around it did
+     not — so scrolled content slid through the band either side of it and the
+     bar read as broken glass rather than a nav. The page background is a fixed
+     gradient over #0b1116, so a flat fill would band against it; this fades to
+     transparent at the bottom edge instead, which keeps the pill looking like
+     it floats while still hiding whatever passes underneath. */
+  background: linear-gradient(
+    to bottom,
+    #0b1116 0%,
+    #0b1116 62%,
+    rgba(11, 17, 22, 0.92) 82%,
+    rgba(11, 17, 22, 0) 100%
+  );
 }
 
 @media (min-width: 768px) {

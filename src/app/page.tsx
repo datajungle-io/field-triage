@@ -82,16 +82,21 @@ export default function HomePage({
                 Free Salesforce audit
               </span>
 
-              <h1 className="mk-h1">Find the custom fields you can delete today.</h1>
+              {/* "custom" lives in the lede rather than the headline — the
+                  precision belongs there and it costs the headline a line break
+                  here. The report is the careful surface: it says Deletion
+                  Candidates, discloses coverage gaps, and flags zero-dependency
+                  counts as unverified when references went unread. A headline
+                  states the proposition; the report qualifies it. */}
+              <h1 className="mk-h1">Find the fields you can delete today.</h1>
 
               <p className="mk-lede">
-                Connect your Salesforce org and we&apos;ll scan every custom field on{" "}
+                Connect your org and we&apos;ll scan every custom field on{" "}
                 <strong style={{ color: "#e8eaed", fontWeight: 600 }}>
                   Lead, Account, Contact and Opportunity
                 </strong>{" "}
-                — how populated each one actually is, how long since anyone touched it, and
-                everywhere in Salesforce it&apos;s still referenced. The same Field Triage
-                report we build for clients, in about three minutes.
+                — how populated each one is, when it was last touched, and what still
+                references it. In about three minutes.
               </p>
 
               {error && (
@@ -138,7 +143,12 @@ export default function HomePage({
                   {[
                     ["822", "Fields scanned", ""],
                     ["149", "Deletion candidates", "tile-red"],
-                    ["34", "No dependencies", "tile-lime"],
+                    // Kept plausible on purpose. 34 came from an early a large org
+                    // scan taken before dependency detection was fixed, when
+                    // that org read as having almost no references at all. Real
+                    // orgs land in single digits, so a high number here would
+                    // set an expectation the report then undercuts.
+                    ["8", "No dependencies", "tile-lime"],
                   ].map(([n, label, cls]) => (
                     <div key={label} className={`mk-preview-tile ${cls}`}>
                       <div className="mk-preview-num">{n}</div>
