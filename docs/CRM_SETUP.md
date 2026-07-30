@@ -1,7 +1,7 @@
 # CRM push — setup
 
-Completed scans upsert a Lead into the Data Jungle CRM
-(`brendanmcdonaldconsulting.my.salesforce.com`, the `pbo` alias).
+Completed scans upsert a Lead into the Data Jungle CRM (the `pbo` alias — our own
+Salesforce org, not the one being scanned).
 
 This is a **different org** from the one being scanned. The scan holds a
 short-lived token for the prospect's org which is revoked the moment the scan
@@ -86,8 +86,7 @@ openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 \
 
 ## 3. Connected App in the PBO
 
-Setup → App Manager → New Connected App, in
-`brendanmcdonaldconsulting.my.salesforce.com`.
+Setup → App Manager → New Connected App, in the CRM org.
 
 - Name: `Field Triage CRM Writer`
 - Enable OAuth Settings: ✅

@@ -21,8 +21,8 @@ email and org, so there is no form anywhere in the product.
 
 This is a port of the Data Jungle field-census pipeline, collapsed from
 (Airbyte → BigQuery → dbt → Evidence) into (Salesforce → Postgres → Next.js). All four
-reference sources are implemented, because [no single Salesforce API covers
-them all](../../instances/canopy-data-jungle/salesforce/jobs/ingest_field_references.py):
+reference sources are implemented, because no single Salesforce API covers them all
+(see `ingest_field_references.py` in the production pipeline):
 
 | Source | Covers | Ported from |
 |---|---|---|
