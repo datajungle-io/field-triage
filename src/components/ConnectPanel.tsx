@@ -58,6 +58,28 @@ export function ConnectPanel() {
         </label>
       </div>
 
+      {/*
+        Salesforce puts a large orange "Security Warning" at the top of the
+        consent screen for every external OAuth app. Hitting it unprepared is
+        what makes people abandon a flow they had already decided to trust, so it
+        is named here first — being told what to expect reads as candour, being
+        surprised by it reads as a red flag. The warning's own condition (someone
+        contacted you and told you to use this) does not apply to a reader who
+        arrived here and chose to click.
+      */}
+      <p style={{ fontSize: 14, lineHeight: 1.55, color: "#6f757e", margin: 0, maxWidth: 620 }}>
+        Salesforce will show an orange security warning on the next screen. It appears for
+        every third-party app and warns against being <em>talked into</em> connecting one —
+        read it, then check what&apos;s actually being asked for: identity, and API access.{" "}
+        <a
+          href="/security"
+          style={{ color: "#9ea3ab", textDecoration: "underline", textUnderlineOffset: 3 }}
+        >
+          What we do with it
+        </a>
+        .
+      </p>
+
       <p style={{ fontSize: 14, lineHeight: 1.55, color: "#6f757e", margin: 0, maxWidth: 620 }}>
         You&apos;ll need the API Enabled and View Setup and Configuration permissions — most
         admins have both. Nothing is written to your org.{" "}

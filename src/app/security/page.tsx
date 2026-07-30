@@ -107,6 +107,46 @@ export default function SecurityPage() {
             </p>
           </section>
 
+          {/* Named before they see it. An unexpected orange warning ends the
+              flow; an expected one is just a form. */}
+          <section style={sectionStyle}>
+            <h2 className="mk-h2" style={{ fontSize: 24 }}>
+              The warning Salesforce will show you
+            </h2>
+            <p className="mk-body">
+              The consent screen opens with a large orange <strong style={strong}>Security
+              Warning</strong>. Salesforce shows it for every external app, and it is worth
+              reading rather than clicking past, because it warns about something specific:
+            </p>
+            <blockquote
+              style={{
+                margin: "1rem 0",
+                padding: "0.9rem 1.2rem",
+                borderLeft: "3px solid #F5B731",
+                background: "rgba(245,183,49,0.06)",
+                color: "#b6bbc2",
+                fontSize: 15,
+                lineHeight: 1.6,
+              }}
+            >
+              &ldquo;If someone contacted you via phone or email and instructed you to use
+              this app, <strong style={strong}>do not proceed</strong>.&rdquo;
+            </blockquote>
+            <p className="mk-body">
+              That is an anti-phishing notice about <em>how you got here</em>, not a judgment
+              about this app. If someone called you and talked you into connecting
+              something, you should absolutely stop — that advice is correct, and it applies
+              to us as much as to anyone. If you found this yourself and chose to click, the
+              condition it describes doesn&apos;t apply.
+            </p>
+            <p className="mk-body" style={{ marginTop: "0.9rem" }}>
+              Underneath it, the screen lists what is actually being requested:{" "}
+              <strong style={strong}>Access the identity URL service</strong> and{" "}
+              <strong style={strong}>Manage user data via APIs</strong>. Two lines. What is
+              not there matters more — see below.
+            </p>
+          </section>
+
           <section style={sectionStyle}>
             <h2 className="mk-h2" style={{ fontSize: 24 }}>
               What we store
@@ -202,10 +242,12 @@ export default function SecurityPage() {
                 <li style={itemStyle}>
                   <span style={{ color: "#9dd31a", flex: "none" }}>1</span>
                   <span style={{ color: "#9ea3ab" }}>
-                    <strong style={strong}>Read the consent screen.</strong> It is
-                    Salesforce&apos;s page, not ours. It will not list &ldquo;Perform
-                    requests at any time&rdquo; — that is the refresh token we never asked
-                    for.
+                    <strong style={strong}>Count the lines on the consent screen.</strong>{" "}
+                    It is Salesforce&apos;s page, not ours, and it lists exactly two:
+                    &ldquo;Access the identity URL service&rdquo; and &ldquo;Manage user data
+                    via APIs&rdquo;. There is no third line reading &ldquo;Perform requests
+                    at any time&rdquo; — that is the offline access we never asked for, and
+                    its absence is why we cannot come back later.
                   </span>
                 </li>
                 <li style={itemStyle}>
