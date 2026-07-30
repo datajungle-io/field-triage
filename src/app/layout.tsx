@@ -1,11 +1,49 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const TITLE = "Field Triage — Data Jungle";
+/**
+ * Kept close to the hero, and under ~155 characters so search results don't
+ * truncate it mid-sentence. The old copy ran to 190 and spent its opening words
+ * on mechanics ("Connect your org and see which…") rather than on what the
+ * reader gets.
+ */
+const DESCRIPTION =
+  "Find the Salesforce fields you can delete today. A free scan of every custom " +
+  "field on Lead, Account, Contact and Opportunity — in about three minutes.";
+const SITE = "https://triage.datajungle.io";
+
 export const metadata: Metadata = {
-  title: "Field Triage — Data Jungle",
-  description:
-    "Free Salesforce field audit. Connect your org and see which custom fields are dead, which are deletion candidates, and which have zero dependencies blocking removal.",
+  // Resolves relative asset URLs below into absolute ones. Crawlers reject a
+  // relative og:image, so without this the card silently never appears.
+  metadataBase: new URL(SITE),
+  title: TITLE,
+  description: DESCRIPTION,
   robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    url: SITE,
+    siteName: "Data Jungle",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Field Triage — find the Salesforce fields you can delete today",
+      },
+    ],
+  },
+  twitter: {
+    // The large card is the difference between a thumbnail beside the text and
+    // a full-width image above it; on a visual card like this one, that is the
+    // whole point of having it.
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/og.png"],
+  },
   // Matches datajungle.io. src/app/icon.svg is picked up automatically by the
   // App Router; these are declared as well so the apple-touch icon and any
   // crawler that ignores the convention still resolve.
