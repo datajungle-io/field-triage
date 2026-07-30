@@ -239,7 +239,14 @@ export default function HomePage({
             <p className="mk-body" style={{ fontSize: 14, color: "#6f757e", maxWidth: 720 }}>
               Connecting tells us your name, email and org — that&apos;s how this is free. We
               use it to send your report link and, occasionally, to ask if you&apos;d like
-              help acting on it.
+              help acting on it.{" "}
+              {/* The detail belongs on its own page, not buried in a footnote —
+                  it's the link to send when someone asks the harder version of
+                  this question in public. */}
+              <a href="/security" style={{ color: "#9ea3ab", textDecoration: "underline" }}>
+                Full security &amp; data handling
+              </a>
+              .
             </p>
           </section>
         </div>

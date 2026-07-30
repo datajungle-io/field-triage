@@ -1,3 +1,6 @@
+/* Self-hosted webfonts — see scripts/vendor-fonts.py. */
+@import "./fonts.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
